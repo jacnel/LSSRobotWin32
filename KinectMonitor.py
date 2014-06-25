@@ -68,9 +68,9 @@ while True:
     lock.acquire()
     if rightWave:
         rightWave=False
-        p.write("rightWave\n")
+        p.write("rightWave " + str(time.time()) + "\n")
     if leftWave:
         leftWave=False
-        p.write("leftWave\n")
+        p.write("leftWave " + str(time.time()) + "\n")
     lock.release()
     Sync()
