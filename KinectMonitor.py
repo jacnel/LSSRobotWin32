@@ -16,40 +16,43 @@ def detect_motion():
     global leftWave
     track = lib.Tracker_new()
     user = 0
-    lstage = "none"
-    rstage = "none"
+    lstage = ["none"]
+    rstage = ["none"]
     while True:
         lib.loop(track)
-        if lib.getUsersCount(track)>0:#for user in range(0,1):#lib.getUsersCount(track)):
-            if lstage=="none":
+        for user in range(0,lib.getUsersCount(track)):
+            if len(lstage)<=user:
+                lstage.append("none")
+                rstage.append("none")
+            if lstage[user]=="none":
                 if lib.getUserSkeletonL_HandX(track,user)-lib.getUserSkeletonL_ElbowX(track,user)>100:
                     if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0:
-                        lstage = "ready"
-            if lstage=="ready":
+                        lstage[user] = "ready"
+            if lstage[user]=="ready":
                 if lib.getUserSkeletonL_ElbowX(track,user)-lib.getUserSkeletonL_HandX(track,user)>100:
                     if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0:
-                        lstage = "none"
+                        lstage[user] = "none"
                         lock.acquire()
                         leftWave = True
-                        sys.stderr.write("got left wave\n")
+                        sys.stderr.write("got left wave from user "+str(user) +"\n")
                         lock.release()
             if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)<0:
-                lstage = "none"
+                lstage[user] = "none"
                 
-            if rstage=="none":
+            if rstage[user]=="none":
                 if lib.getUserSkeletonR_HandX(track,user)-lib.getUserSkeletonR_ElbowX(track,user)<-100:
                     if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)>0:
-                        rstage = "ready"
-            if rstage=="ready":
+                        rstage[user] = "ready"
+            if rstage[user]=="ready":
                 if lib.getUserSkeletonR_ElbowX(track,user)-lib.getUserSkeletonR_HandX(track,user)<-100:
                     if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)>0:
-                        rstage = "none"
+                        rstage[user] = "none"
                         lock.acquire()
                         rightWave = True
-                        sys.stderr.write("got right wave\n")
+                        sys.stderr.write("got right wave from user "+str(user)+"\n")
                         lock.release()
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)<0:
-                rstage = "none"
+                rstage[user] = "none"
 
 
 def handleLine():
