@@ -219,6 +219,15 @@ class iRobotCreate:
             self.mode_handler.delete()
         else:
             raise InputError('Method cannot be called while in simulation mode')
+            
+     #A more accurate rotate function
+    def slowRotate(self, angleRad):
+        totalr = 0
+        while totalr <= angleRad and not self.isbumped():
+        #    print "Rotating."
+        #    print totalr
+            self.setvel(0,np.pi/10)
+            totalr = totalr + self.angle_sensor()
 
     #returns position in x, y, theta            
     def whereAmI(self):
@@ -237,8 +246,10 @@ class iRobotCreate:
         return alpha
 
     #move to a point x, y, theta (rads)
+    #move to a point x, y, theta (rads)
     def moveTo(self, nx, ny, ntheta):
         """moves to a point"""
+        ANGLE_MOD = .9
         dX = nx - self.x
         dY = ny - self.y
         #forces ntheta to equivalent angle between -pi and pi
@@ -248,13 +259,20 @@ class iRobotCreate:
         
         alpha = math.atan2(dY, dX)
         if not math.fabs(dX) < .01 or not math.fabs(dY) < .01: 
-            self.rotate(self.angleSub(self.theta, alpha))
+            #totalr = 0
+            self.rotate(ANGLE_MOD*self.angleSub(self.theta, alpha))
+            #while totalr <= self.angleSub(self.theta,alpha) and not self.isbumped():
+            #    self.setvel(0,np.pi/10)
+            #    totalr = totalr + self.angle_sensor()
             dist = np.sqrt(dX**2 + dY**2)
             self.forward(dist)
         else:
             alpha = self.theta
-
-        self.rotate(self.angleSub(alpha, ntheta))
+        self.rotate(ANGLE_MOD*self.angleSub(alpha, ntheta))
+        #totalr=0
+        #while totalr <= self.angleSub(self.theta,alpha) and not self.isbumped():
+        #        self.setvel(0,np.pi/10)
+        #        totalr = totalr + self.angle_sensor()
         self.x = nx
         self.y = ny
         self.theta = ntheta
@@ -450,6 +468,15 @@ class iRobotCreate_real:
         print 'Gracefully Exiting! Create connection Terminated. \nOpen up a new connection to continue using the Create.\n'
         sys.exit(0)
 
+    #A more accurate rotate function
+    def slowRotate(self, angleRad):
+        totalr = 0
+        while totalr <= angleRad and not self.isbumped():
+            #print "Rotating."
+            #print totalr
+            self.setvel(0,np.pi/10)
+            totalr = totalr + self.angle_sensor()
+
     #returns position in x, y, theta            
     def whereAmI(self):
         """returns current position"""
@@ -478,13 +505,20 @@ class iRobotCreate_real:
         
         alpha = math.atan2(dY, dX)
         if not math.fabs(dX) < .01 or not math.fabs(dY) < .01: 
-            self.rotate(self.angleSub(self.theta, alpha))
+            #totalr = 0
+            self.slowRotate(self.angleSub(self.theta, alpha))
+            #while totalr <= self.angleSub(self.theta,alpha) and not self.isbumped():
+            #    self.setvel(0,np.pi/10)
+            #    totalr = totalr + self.angle_sensor()
             dist = np.sqrt(dX**2 + dY**2)
             self.forward(dist)
         else:
             alpha = self.theta
-
-        self.rotate(self.angleSub(alpha, ntheta))
+            self.slowRotate(self.angleSub(alpha, ntheta))
+        #totalr=0
+        #while totalr <= self.angleSub(self.theta,alpha) and not self.isbumped():
+        #        self.setvel(0,np.pi/10)
+        #        totalr = totalr + self.angle_sensor()
         self.x = nx
         self.y = ny
         self.theta = ntheta
