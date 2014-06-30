@@ -1,0 +1,16 @@
+myTest/Cassie0.jpeg;1
+myTest/Chris0.jpeg;0
+myTest/Chris2.jpeg;0
+myTest/Chris3.jpeg;0
+myTest/Chris4.jpeg;0
+myTest/Cassie1.jpeg;1
+myTest/Cassie2.jpeg;1
+myTest/Cassie3.jpeg;1
+myTest/Cassie4.jpeg;1
+myTest/Steve0.jpeg;3
+myTest/Steve1.jpeg;3
+myTest/Steve4.jpeg;3
+myTest/Steve3.jpeg;3
+myTest/Steve2.jpeg;3
+myTest/Chris6.jpeg;0
+myTest/Chris1.jpeg;0
