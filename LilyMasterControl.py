@@ -5,10 +5,14 @@ import iRobotCreate
 import time
 import IPC
 import Queue
+import string
 
-# q is a Queue which holds commands sent from the Kinect monitor
+# qGest is a Queue which holds commands for gestures sent from the Kinect monitor
 #    these commands are pulled off the queue when all processes are ready
-q = Queue.Queue()
+qGest = Queue.Queue()
+
+# Queue to hold the follow commands to follow the user
+qFollow = Queue.Queue()
 
 #The program will continue to wait for commands to be received until quit = True
 quit = False
@@ -23,6 +27,41 @@ readyTT=False
 #holds the time of completion of the most recent movement
 lastMoveTime = time.time()
 
+state = "waiting"
+
+def follow():
+    global state
+    if not state == "following":
+        global readyTT
+        print "Following."
+        readyTT = False
+        sp.write("follow\n")
+    state = "following"
+    line = qFollow.get()
+    list = string.split(line)
+    if list[1] == "stop":
+        global readyTT
+        global lastMoveTime
+        print "Stopping."
+        readyTT = False
+        sp.write("stopFollow\n")
+        r.setvel(0,0)
+        state = "waiting"
+        lastMoveTime = time.time()
+        return
+    a = float(list[1])
+    b = float(list[2])
+    ts = float(list[3])
+    
+    if not a == 0:
+        c = a - (1/(1+(b/a)**2))**.5
+        d = b - (b/a)*((1/(1+(b/a)**2))**.5)
+    else:
+        c = 0 
+        d = b - 1 
+    
+    r.goToGoal(c,d)
+
 # Checks if phrasesToSay.py is ready to accept another input phrase
 def checkReady():
     global readyTT
@@ -32,8 +71,12 @@ def checkReady():
         readyTT=True
 
 def KinectQueue():
+    line = km.line.strip()
+    if line[:line.find(' ')] == "follow":
+        qFollow.put(line)
+    else:
     #Gestures received from the Kinect Monitor will be added to the queue
-    q.put(km.line.strip())
+        qGest.put(line)
 
 # Search for gesture
 def GestureResponse():
@@ -42,13 +85,11 @@ def GestureResponse():
     if readyTT==False:
         return
     # when TTS is ready, pull the next gesture off of the queue
-    line = q.get() #line should be "command timeStamp"
-    print line
+    line = qGest.get() #line should be "command timeStamp"
     gest = line[:line.find(' ')] #holds "command"
-    print gest
     timeStamp = float(line[line.find(' ')+1:]) #holds float version of timeStamp
     #exit if message was received during the last movement
-    if timeStamp < lastMoveTime:
+    if timeStamp < lastMoveTime or not state == "waiting":
         return
     if gest == "rightWave":
         waveRight()
@@ -79,7 +120,7 @@ def waveLeft():
     r.moveTo(r.x,r.y-1,r.theta)
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE"
-      
+    
 # Close connection
 def Exit():
     global readyTT
@@ -129,13 +170,31 @@ print "Lily is ready!"
 #command TTS
 sp.write("query\n")
 
+qFollow.put("follow 0 2 1.345")
+qFollow.put("follow 0 2 1.57")
+qFollow.put("follow 0 2 1.7")
+qFollow.put("follow 0 2 1.345")
+qFollow.put("follow 0 2 1.345")
+qFollow.put("follow 0 -2 1.345")
+qFollow.put("follow 0 -2 1.345")
+qFollow.put("follow 0 -2 1.345")
+qFollow.put("follow 0 -2 1.345")
+qFollow.put("follow 0 -2 1.345")
+qFollow.put("follow .5 .7 1.345")
+qFollow.put("follow .10 .1 1.345")
+qFollow.put("follow .6 .5 1.345")
+qFollow.put("follow 11 6 1.345")
+qFollow.put("follow stop")
 
 #Waiting state: search for gestures from the kinect monitor
 while quit == False:  #The user has not asked to quit.
     km.tryReadLine()  #receive input from the kinect monitor
     sp.tryReadLine()  # receive input from the TTS
+    
+    if not qFollow.empty():
+        follow()
 
 # if there are items on the queue, try to respond
-    if not q.empty():  
+    if not qGest.empty():  
         GestureResponse()
     IPC.Sync()

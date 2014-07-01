@@ -30,12 +30,16 @@ phrases["left"] = "I am moving to your left"
 phrases["hello"] = "Hello there"
 phrases["query"] = "What would you like me to do"
 phrases["bye"] = "Good bye"
+phrases["follow"] = "I am following you now"
+phrases["stopFollow"] = "I am no longer following you"
 
 delay = {"right": 3}
 delay["left"] = 3
 delay["hello"] = 2
 delay["query"] = 3
 delay["bye"] = 2
+delay["follow"] = 3
+delay["stopFollow"] = 3.3
 
 
 p = IPC.process(True, "phrasesToSay")
