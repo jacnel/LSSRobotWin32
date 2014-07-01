@@ -1,7 +1,6 @@
 import ctypes
 lib=ctypes.CDLL('nitepy')
 
-track = lib.Tracker_new()
 lib.getUserSkeletonHeadX.restype = ctypes.c_float
 lib.getUserSkeletonHeadY.restype = ctypes.c_float
 lib.getUserSkeletonHeadZ.restype = ctypes.c_float
