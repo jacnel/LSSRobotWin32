@@ -1,6 +1,7 @@
 import ctypes
 lib=ctypes.CDLL('nitepy')
 
+track = lib.Tracker_new()
 lib.getUserSkeletonHeadX.restype = ctypes.c_float
 lib.getUserSkeletonHeadY.restype = ctypes.c_float
 lib.getUserSkeletonHeadZ.restype = ctypes.c_float
@@ -60,3 +61,15 @@ lib.getUserSkeletonL_FootZ.restype = ctypes.c_float
 lib.getUserSkeletonR_FootX.restype = ctypes.c_float
 lib.getUserSkeletonR_FootY.restype = ctypes.c_float
 lib.getUserSkeletonR_FootZ.restype = ctypes.c_float
+count = 0
+while(True):
+    count = count + 1
+    lib.loop(track)
+    if count == 10:
+        lib.detectPeople(track)
+        count = 0
+    if lib.getUsersCount(track) > 0:
+        headX = lib.getUserSkeletonHeadX(track, 0)
+        headY = lib.getUserSkeletonHeadY(track, 0)
+        headZ = lib.getUserSkeletonHeadZ(track, 0)
+        #print str(headX) + " " + str(headY) + " " + str(headZ)

@@ -8,22 +8,38 @@ lock = threading.Lock()
 lock.acquire()
 rightWave=False
 leftWave =False
+follow = False
+stopfollow = False
+userOfInt=0
+quits = False
 lock.release()
-
+track = lib.Tracker_new()
 
 def detect_motion():
     global rightWave
     global leftWave
-    track = lib.Tracker_new()
+    global follow
+    global stopfollow
+    global userOfInt
+    global quits
+    global track
     user = 0
     lstage = ["none"]
     rstage = ["none"]
+    follstage = ["none"]
+    stopfollstage = ["none"]
+    quitstage = ["none"]
     while True:
+        lock.acquire()
         lib.loop(track)
+        lock.release()
         for user in range(0,lib.getUsersCount(track)):
             if len(lstage)<=user:
                 lstage.append("none")
                 rstage.append("none")
+                follstage.append("none")
+                quitstage.append("none")
+                stopfollstage.append("none")
             if lstage[user]=="none":
                 if lib.getUserSkeletonL_HandX(track,user)-lib.getUserSkeletonL_ElbowX(track,user)>100:
                     if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0:
@@ -53,8 +69,65 @@ def detect_motion():
                         lock.release()
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)<0:
                 rstage[user] = "none"
+            if follstage[user]=="none":
+                if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))<100:
+                    if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))>300:
+                        follstage[user] = "ext"
+            if follstage[user]=="ext":
+                if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))<100:
+                    if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))<150:
+                        follstage[user]="none"
+                        lock.acquire()
+                        userOfInt = user
+                        follow = True
+                        sys.stderr.write("got follow from user "+str(user)+"\n")
+                        lock.release()
+            if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))>100:
+                follstage[user]="none"
+            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
+                follstage[user]="none"
+            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
+                follstage[user]="none"
+
+            if stopfollstage[user]=="none":
+                if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))<100:
+                    if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))<150:
+                        stopfollstage[user] = "close"
+            if stopfollstage[user]=="close":
+                if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))<100:
+                    if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))>300:
+                        stopfollstage[user]="none"
+                        lock.acquire()
+                        userOfInt = user
+                        stopfollow = True
+                        sys.stderr.write("got stop follow from user "+str(user)+"\n")
+                        lock.release()
+            if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))>100:
+                stopfollstage[user]="none"
+            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
+                stopfollstage[user]="none"
+            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
+                stopfollstage[user]="none"
 
 
+
+
+                
+            if quitstage[user]=="none":
+                if lib.getUserSkeletonR_HandX(track,user)-lib.getUserSkeletonNeckX(track,user)<-50:
+                    quitstage[user]="scut"
+            if quitstage[user]=="scut":
+                if lib.getUserSkeletonR_HandX(track,user)-lib.getUserSkeletonNeckX(track,user)>50:
+                    quitstage[user]="none"
+                    lock.acquire()
+                    quits = True
+                    sys.stderr.write("goodbye "+str(user)+"\n")
+                    lock.release()
+            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonNeckY(track,user)<0:
+                quitstage[user]="none"
+            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonHeadY(track,user)>0:
+                quitstage[user]="none"
+            
 def handleLine():
     sys.stderr.write(p.line)
 
@@ -66,6 +139,16 @@ InitSync()
 while True:
     p.tryReadLine()
     lock.acquire()
+    lib.detectPeople(track)
+    if stopfollow:
+        p.write("follow stop "+str(time.time()) + "\n")
+        follow = False
+        stopfollow = False
+    if quits:
+        p.write("quit " + str(time.time()) + "\n")
+        exit()
+    if follow:
+        p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,userOfInt)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,userOfInt)/1000)+" " + str(time.time()) + "\n")
     if rightWave:
         rightWave=False
         p.write("rightWave " + str(time.time()) + "\n")

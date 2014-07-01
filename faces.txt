@@ -1,0 +1,17 @@
+myTest/chris0.jpg;0
+myTest/chris1.jpg;0
+myTest/chris2.jpg;0
+myTest/chris3.jpg;0
+myTest/chris4.jpg;0
+myTest/chris5.jpg;0
+myTest/Daniel0.jpg;1
+myTest/Daniel1.jpg;1
+myTest/Daniel2.jpg;1
+myTest/Daniel3.jpg;1
+myTest/Daniel4.jpg;1
+myTest/Daniel5.jpg;1
+myTest/cas3.jpg;2
+myTest/cas4.jpg;2
+myTest/cas5.jpg;2
+myTest/cas6.jpg;2
+myTest/cas7.jpg;2
