@@ -65,7 +65,7 @@ count = 0
 while(True):
     count = count + 1
     lib.loop(track)
-    if count == 30:
+    if count == 10:
         lib.detectPeople(track)
         count = 0
     if lib.getUsersCount(track) > 0:
