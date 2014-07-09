@@ -31,8 +31,9 @@ state = "waiting"
 
 def follow():
     global state
+    global readyTT
+    global lastMoveTime
     if not state == "following":
-        global readyTT
         print "Following."
         readyTT = False
         sp.write("follow\n")
@@ -40,27 +41,29 @@ def follow():
     line = qFollow.get()
     list = string.split(line)
     if list[1] == "stop":
-        global readyTT
-        global lastMoveTime
         print "Stopping."
         readyTT = False
-        sp.write("stopFollow\n")
         r.setvel(0,0)
+        sp.write("stopFollow\n")
         state = "waiting"
         lastMoveTime = time.time()
         return
     a = float(list[1])
     b = float(list[2])
     ts = float(list[3])
+    #if ts < lastMoveTime:
+    #    return
+    distF = 2 #distance behind person
     
     if not a == 0:
-        c = a - (1/(1+(b/a)**2))**.5
-        d = b - (b/a)*((1/(1+(b/a)**2))**.5)
+        c = a - (distF/(1+(b/a)**2))**.5
+        d = b - (b/a)*((distF/(1+(b/a)**2))**.5)
     else:
         c = 0 
         d = b - 1 
     
     r.goToGoal(c,d)
+    lastMoveTime = time.time()
 
 # Checks if phrasesToSay.py is ready to accept another input phrase
 def checkReady():
@@ -170,22 +173,6 @@ print "Lily is ready!"
 #command TTS
 sp.write("query\n")
 
-qFollow.put("follow 0 2 1.345")
-qFollow.put("follow 0 2 1.57")
-qFollow.put("follow 0 2 1.7")
-qFollow.put("follow 0 2 1.345")
-qFollow.put("follow 0 2 1.345")
-qFollow.put("follow 0 -2 1.345")
-qFollow.put("follow 0 -2 1.345")
-qFollow.put("follow 0 -2 1.345")
-qFollow.put("follow 0 -2 1.345")
-qFollow.put("follow 0 -2 1.345")
-qFollow.put("follow .5 .7 1.345")
-qFollow.put("follow .10 .1 1.345")
-qFollow.put("follow .6 .5 1.345")
-qFollow.put("follow 11 6 1.345")
-qFollow.put("follow stop")
-
 #Waiting state: search for gestures from the kinect monitor
 while quit == False:  #The user has not asked to quit.
     km.tryReadLine()  #receive input from the kinect monitor
@@ -193,7 +180,15 @@ while quit == False:  #The user has not asked to quit.
     
     if not qFollow.empty():
         follow()
-
+    else:
+        if state == "following":
+            print "Stopping."
+            readyTT = False
+            r.setvel(0,0)
+            sp.write("lost\n")
+            state = "waiting"
+            lastMoveTime = time.time()
+            
 # if there are items on the queue, try to respond
     if not qGest.empty():  
         GestureResponse()

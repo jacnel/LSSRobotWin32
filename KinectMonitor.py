@@ -3,6 +3,12 @@ from nitepy import *
 import threading
 import thread
 import sys
+from numpy import *
+
+from win32api import GetCurrentThread
+from win32process import THREAD_PRIORITY_IDLE, SetThreadPriority
+
+
 
 lock = threading.Lock()
 lock.acquire()
@@ -10,10 +16,17 @@ rightWave=False
 leftWave =False
 follow = False
 stopfollow = False
+pauseSkel = False
 userOfInt=0
 quits = False
+e = threading.Event()
 lock.release()
 track = lib.Tracker_new()
+
+lib.loop(track)
+
+readyCount = 0 #so face identification is run every NUM_LOOPS times
+NUM_LOOPS = 10 #number of loops before each attempted facial recognition
 
 def detect_motion():
     global rightWave
@@ -108,11 +121,7 @@ def detect_motion():
                 stopfollstage[user]="none"
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
                 stopfollstage[user]="none"
-
-
-
-
-                
+                    
             if quitstage[user]=="none":
                 if lib.getUserSkeletonR_HandX(track,user)-lib.getUserSkeletonNeckX(track,user)<-50:
                     quitstage[user]="scut"
@@ -127,19 +136,53 @@ def detect_motion():
                 quitstage[user]="none"
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonHeadY(track,user)>0:
                 quitstage[user]="none"
-            
+        
+
+def facialActions():
+    global e
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE)
+    #sys.stderr.write("set priority idle\n")
+    while True:
+        lock.acquire()
+        lib.takeSnapShot(track)
+        lock.release()
+        lib.detectPeople1(track)
+        #sys.stderr.write("done 1\n")
+        sys.stderr.flush()
+        #time.sleep(.1) 
+        e.wait()
+        lib.detectPeople2(track)
+        #sys.stderr.write("done 2\n")
+        sys.stderr.flush()
+        #time.sleep(.1) 
+        e.wait() 
+        lib.detectPeople3(track)
+        #sys.stderr.write("done 3\n")
+        sys.stderr.flush()
+        #time.sleep(.1) 
+        e.wait()
+        lib.detectPeople4(track)
+        #sys.stderr.write("done 4\n")
+        sys.stderr.flush()
+        time.sleep(.15)  
+        e.wait()
+        #time.sleep(1)       
+                
+                                
 def handleLine():
-    sys.stderr.write(p.line)
+    sys.stderr.write("handle line " + p.line)
 
 thread.start_new_thread(detect_motion,())
+thread.start_new_thread(facialActions, ())
 
-p = process(True,"")
+sys.stderr.write("starting KM process\n")
+
+p = process(True,"KM")
 p.setOnReadLine(handleLine)
 InitSync()
 while True:
     p.tryReadLine()
     lock.acquire()
-    lib.detectPeople(track)
     if stopfollow:
         p.write("follow stop "+str(time.time()) + "\n")
         follow = False
@@ -148,7 +191,11 @@ while True:
         p.write("quit " + str(time.time()) + "\n")
         exit()
     if follow:
-        p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,userOfInt)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,userOfInt)/1000)+" " + str(time.time()) + "\n")
+        sys.stderr.write(str(track) + "      " + str(userOfInt) + "\n")
+        if lib.isUserTracked(track, userOfInt):
+            p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,userOfInt)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,userOfInt)/1000)+" " + str(time.time()) + "\n")
+        else:
+            follow = False
     if rightWave:
         rightWave=False
         p.write("rightWave " + str(time.time()) + "\n")
@@ -156,4 +203,7 @@ while True:
         leftWave=False
         p.write("leftWave " + str(time.time()) + "\n")
     lock.release()
+    e.set()
+    e.clear()
     Sync()
+    

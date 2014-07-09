@@ -27,11 +27,12 @@ def onLineRead():
                 
 phrases = {"right": "I am moving to your right"}
 phrases["left"] = "I am moving to your left"
-phrases["hello"] = "Hello there"
+phrases["hello"] = "Hello there Cassandra"
 phrases["query"] = "What would you like me to do"
 phrases["bye"] = "Good bye"
-phrases["follow"] = "I am following you now"
+phrases["follow"] = "I am following you now Cassandra"
 phrases["stopFollow"] = "I am no longer following you"
+phrases["lost"] = "I can not see you"
 
 delay = {"right": 3}
 delay["left"] = 3
@@ -40,7 +41,7 @@ delay["query"] = 3
 delay["bye"] = 2
 delay["follow"] = 3
 delay["stopFollow"] = 3.3
-
+delay["lost"] = 2.5
 
 p = IPC.process(True, "phrasesToSay")
 p.setOnReadLine(onLineRead)
