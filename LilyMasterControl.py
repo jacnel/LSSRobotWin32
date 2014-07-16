@@ -87,10 +87,10 @@ def VocalQueue():
     if line == "follow":
         km.write('follow\n')
     if line == "stop":
-        km.write('stop\n')
+        km.write('follow stop\n')
     else:
     #Gestures received from the Voice Monitor will be added to the queue
-        qGest.put(line)
+        qGest.put(line + ' ' + str(time.time()) + '\n')
 
 # Search for gesture
 def GestureResponse():

@@ -137,7 +137,7 @@ def detect_motion():
 
 def facialActions():
     global e
-    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE)
+    #SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE)
     #sys.stderr.write("set priority idle\n")
     while True:
         lock.acquire()
@@ -149,12 +149,14 @@ def facialActions():
                 
                                 
 def handleLine():
+    global userOfInt
+    global follow
     if p.line == "follow\n":
         if lib.getUsersCount(track)>0:
             lock.acquire()
             userOfInt = 0
             follow = True
-            sys.stderr.write("got follow from user "+str(user)+"\n")
+            sys.stderr.write("got follow from user "+str(userOfInt)+"\n")
             lock.release()
     if p.line == "follow stop\n":
         follow = False
@@ -179,7 +181,7 @@ while True:
         p.write("quit " + str(time.time()) + "\n")
         exit()
     if follow:
-        sys.stderr.write(str(track) + " " + str(userOfInt) + "\n")
+        #sys.stderr.write(str(track) + " " + str(userOfInt) + "\n")
         if lib.isUserTracked(track, userOfInt):
             p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,userOfInt)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,userOfInt)/1000)+" " + str(time.time()) + "\n")
         else:

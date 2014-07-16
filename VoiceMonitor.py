@@ -9,7 +9,7 @@ import SpeechRecognitionApp as sra
 
 commands = ['Lily', 'rightWave', 'leftWave', 'follow', 'stop', 'quit']
 
-vm = IPC.process(True, 'VoiceMonitor.py')
+vm = process(True, 'VoiceMonitor.py')
 
 re = sra.Program()
 engine = re.buildRecognizer()
