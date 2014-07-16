@@ -152,6 +152,12 @@ def facialActions():
                 
                                 
 def handleLine():
+    if p.line == "follow\n":
+        if lib.getUsersCount(track)>0:
+            follow = True
+            userOfInt=0;
+    if p.line == "follow stop\n":
+        follow = False
     sys.stderr.write("handle line " + p.line)
 
 thread.start_new_thread(detect_motion,())
