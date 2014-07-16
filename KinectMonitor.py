@@ -186,6 +186,7 @@ while True:
             p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,userOfInt)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,userOfInt)/1000)+" " + str(time.time()) + "\n")
         else:
             follow = False
+            p.write("follow stop "+str(time.time()) + "\n")
     if rightWave:
         rightWave=False
         p.write("rightWave " + str(time.time()) + "\n")
