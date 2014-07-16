@@ -1,4 +1,4 @@
-# Master Control for the Lily Robot
+# Master Control for the LILI Robot
 # 20 June 2014
 
 import iRobotCreate
@@ -50,7 +50,7 @@ def follow():
         return
     a = float(list[1])
     b = float(list[2])
-    ts = float(list[3])
+#    ts = float(list[3])
     #if ts < lastMoveTime:
     #    return
     distF = 2 #distance behind person
@@ -81,6 +81,17 @@ def KinectQueue():
     #Gestures received from the Kinect Monitor will be added to the queue
         qGest.put(line)
 
+def VocalQueue():
+    global state
+    line = vm.line.strip()
+    if line == "follow":
+        km.write('follow\n')
+    if line == "stop":
+        km.write('stop\n')
+    else:
+    #Gestures received from the Voice Monitor will be added to the queue
+        qGest.put(line)
+
 # Search for gesture
 def GestureResponse():
     global readyTT
@@ -92,8 +103,11 @@ def GestureResponse():
     gest = line[:line.find(' ')] #holds "command"
     timeStamp = float(line[line.find(' ')+1:]) #holds float version of timeStamp
     #exit if message was received during the last movement
-    if timeStamp < lastMoveTime or not state == "waiting":
-        return
+    if not gest == 'Lily':
+        if timeStamp < lastMoveTime or not state == "waiting":
+            return
+    if gest == "Lily":
+        print "Yes?"
     if gest == "rightWave":
         waveRight()
     if gest == "leftWave":
@@ -150,6 +164,10 @@ sp = IPC.process(False, 'phrasesToSay.py')
         #check if the TTS program is ready to receive input
 sp.setOnReadLine(checkReady)
 
+# Open Speech Recognition Control
+vm = IPC.process(False, 'VoiceMonitor.py')
+vm.setOnReadLine(VocalQueue)
+
 # Initialize synchronization
 IPC.InitSync()
 
@@ -174,8 +192,9 @@ print "Lily is ready!"
 sp.write("query\n")
 
 #Waiting state: search for gestures from the kinect monitor
-while quit == False:  #The user has not asked to quit.
-    km.tryReadLine()  #receive input from the kinect monitor
+while quit == False: # The user has not asked to quit.
+    vm.tryReadLine()  # receive input from the voice monitor
+    km.tryReadLine()  # receive input from the kinect monitor
     sp.tryReadLine()  # receive input from the TTS
     
     if not qFollow.empty():
