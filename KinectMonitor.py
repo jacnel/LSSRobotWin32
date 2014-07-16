@@ -3,10 +3,7 @@ from nitepy import *
 import threading
 import thread
 import sys
-from numpy import *
 
-from win32api import GetCurrentThread
-from win32process import THREAD_PRIORITY_IDLE, SetThreadPriority
 
 
 
@@ -140,7 +137,7 @@ def detect_motion():
 
 def facialActions():
     global e
-    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE)
+    #SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE)
     #sys.stderr.write("set priority idle\n")
     while True:
         lock.acquire()
