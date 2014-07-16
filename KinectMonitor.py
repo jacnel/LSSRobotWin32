@@ -3,7 +3,10 @@ from nitepy import *
 import threading
 import thread
 import sys
+from numpy import *
 
+from win32api import GetCurrentThread
+from win32process import THREAD_PRIORITY_IDLE, SetThreadPriority
 
 
 
@@ -137,7 +140,7 @@ def detect_motion():
 
 def facialActions():
     global e
-    #SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE)
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE)
     #sys.stderr.write("set priority idle\n")
     while True:
         lock.acquire()
@@ -145,7 +148,7 @@ def facialActions():
         lock.release()
         lib.detectPeople(track)
        
-        time.sleep(1)   
+        time.sleep(1)
                 
                                 
 def handleLine():
@@ -170,7 +173,7 @@ while True:
         p.write("quit " + str(time.time()) + "\n")
         exit()
     if follow:
-        sys.stderr.write(str(track) + "      " + str(userOfInt) + "\n")
+        sys.stderr.write(str(track) + " " + str(userOfInt) + "\n")
         if lib.isUserTracked(track, userOfInt):
             p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,userOfInt)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,userOfInt)/1000)+" " + str(time.time()) + "\n")
         else:
@@ -185,4 +188,3 @@ while True:
     e.set()
     e.clear()
     Sync()
-    
