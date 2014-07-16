@@ -151,8 +151,11 @@ def facialActions():
 def handleLine():
     if p.line == "follow\n":
         if lib.getUsersCount(track)>0:
+            lock.acquire()
+            userOfInt = 0
             follow = True
-            userOfInt=0;
+            sys.stderr.write("got follow from user "+str(user)+"\n")
+            lock.release()
     if p.line == "follow stop\n":
         follow = False
     sys.stderr.write("handle line " + p.line)
