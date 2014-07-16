@@ -3,10 +3,7 @@ from nitepy import *
 import threading
 import thread
 import sys
-from numpy import *
 
-from win32api import GetCurrentThread
-from win32process import THREAD_PRIORITY_IDLE, SetThreadPriority
 
 
 
