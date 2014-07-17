@@ -151,6 +151,7 @@ def facialActions():
 def handleLine():
     global userOfInt
     global follow
+    global stopfollow
     if p.line == "follow\n":
         if lib.getUsersCount(track)>0:
             lock.acquire()
@@ -158,9 +159,13 @@ def handleLine():
             follow = True
             sys.stderr.write("got follow from user "+str(userOfInt)+"\n")
             lock.release()
-    if p.line == "follow stop\n":
-        follow = False
-    sys.stderr.write("handle line " + p.line)
+        else:
+            sys.stder.write("no users\n")
+    elif p.line == "follow stop\n":
+        stopfollow = True
+        sys.stderr.write("got stop follow\n")
+    else:
+        sys.stderr.write("handle line " + p.line)
 
 thread.start_new_thread(detect_motion,())
 thread.start_new_thread(facialActions, ())
