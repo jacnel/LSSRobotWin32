@@ -90,7 +90,7 @@ def VocalQueue():
         km.write('follow stop\n')
     else:
     #Gestures received from the Voice Monitor will be added to the queue
-        qGest.put(line + ' ' + str(time.time()) + '\n')
+        qGest.put(line + ' ' + str(time.time()))
 
 # Search for gesture
 def GestureResponse():
@@ -125,7 +125,7 @@ def waveRight():
     print "Moving one meter to the right."
     r.moveTo(r.x,r.y+1,r.theta)
     lastMoveTime = time.time() #update lastMoveTime
-    print "DONE"
+    print "DONE\n"
     
 def waveLeft():
     global readyTT
@@ -136,7 +136,7 @@ def waveLeft():
     print "Moving one meter to the left."
     r.moveTo(r.x,r.y-1,r.theta)
     lastMoveTime = time.time() #update lastMoveTime
-    print "DONE"
+    print "DONE\n"
     
 # Close connection
 def Exit():
@@ -190,6 +190,7 @@ readyTT = False
 print "Lily is ready!"
 #command TTS
 sp.write("query\n")
+#vm.write('True')
 
 #Waiting state: search for gestures from the kinect monitor
 while quit == False: # The user has not asked to quit.
@@ -201,12 +202,15 @@ while quit == False: # The user has not asked to quit.
         follow()
     else:
         if state == "following":
-            print "Stopping."
-            readyTT = False
-            r.setvel(0,0)
-            sp.write("lost\n")
-            state = "waiting"
-            lastMoveTime = time.time()
+            km.write('follow stop\n')
+            #qFollow.put('follow stop\n')
+            #follow()
+            #print "Stopping."
+            #readyTT = False
+            #r.setvel(0,0)
+            #sp.write("lost\n")
+            #state = "waiting"
+            #lastMoveTime = time.time()
             
 # if there are items on the queue, try to respond
     if not qGest.empty():  
