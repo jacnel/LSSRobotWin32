@@ -108,7 +108,7 @@ def detect_motion():
                     if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))>300:
                         stopfollstage[user]="none"
                         lock.acquire()
-                        userOfInt = user
+                        userOfInt = lib.getUserID(track,user)
                         stopfollow = True
                         sys.stderr.write("got stop follow from user "+str(user)+"\n")
                         lock.release()
@@ -155,9 +155,9 @@ def handleLine():
     if p.line == "follow\n":
         if lib.getUsersCount(track)>0:
             lock.acquire()
-            userOfInt = 0
+            userOfInt = lib.getUserID(track,0)
             follow = True
-            sys.stderr.write("got follow from user "+str(userOfInt)+"\n")
+            sys.stderr.write("got follow from userID "+str(userOfInt)+"\n")
             lock.release()
         else:
             sys.stder.write("no users\n")
@@ -187,11 +187,19 @@ while True:
         exit()
     if follow:
         #sys.stderr.write(str(track) + " " + str(userOfInt) + "\n")
-        if lib.isUserTracked(track, userOfInt):
-            p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,userOfInt)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,userOfInt)/1000)+" " + str(time.time()) + "\n")
-        else:
-            follow = False
-            p.write("follow stop "+str(time.time()) + "\n")
+        user = -1
+        index = 0
+        while index<lib.getUserCount(track): #find index of userOfInt which is a UserID. (user is an index)
+            if lib.getUserID(track,index)==userOfInt:
+                user = index
+            index = index + 1
+        if user>=0: #we found the user
+            if lib.isUserTracked(track, user):
+                p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+" " + str(time.time()) + "\n")
+            else:#they aren't tracked
+                stopfollow = True
+        else:#they're not here
+            stopfollow = True
     if rightWave:
         rightWave=False
         p.write("rightWave " + str(time.time()) + "\n")
