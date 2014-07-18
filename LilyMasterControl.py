@@ -178,7 +178,7 @@ def waveRight():
     readyTT = False
     sp.write("right\n")
     print "Moving one meter to the right."
-    while not r.isbumped():
+    if not r.isbumped():
         r.moveTo(r.x,r.y+1,r.theta)
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
@@ -190,7 +190,7 @@ def waveLeft():
     readyTT = False
     sp.write("left\n")
     print "Moving one meter to the left."
-    while not r.isbumped():
+    if not r.isbumped():
         r.moveTo(r.x,r.y-1,r.theta)
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"

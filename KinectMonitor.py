@@ -224,17 +224,17 @@ while True:
         p.write("quit " + str(time.time()) + "\n")
         exit()
     if follow:
-        sys.stderr.write(str(track) + " " + str(userOfInt) + "\n")
+        #sys.stderr.write(str(track) + " " + str(userOfInt) + "\n")
         user = -1
         index = 0
         while index<lib.getUsersCount(track): #find index of userOfInt which is a UserID. (user is an index)
-            sys.stderr.write("in while loop\n")
+            #sys.stderr.write("in while loop\n")
             if lib.getUserID(track,index)==userOfInt:
                 user = index
             index = index + 1
         if user>=0: #we found the user
             if lib.isUserTracked(track, user):
-                sys.stderr.write("is following\n")
+                #sys.stderr.write("is following\n")
                 p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+" " + str(time.time()) + "\n")
             else:#they aren't tracked
                 stopfollow = True
