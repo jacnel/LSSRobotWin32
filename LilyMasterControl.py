@@ -6,6 +6,7 @@ import time
 import IPC
 import Queue
 import string
+import sys
 
 # qGest is a Queue which holds commands for gestures sent from the Kinect monitor
 #    these commands are pulled off the queue when all processes are ready
