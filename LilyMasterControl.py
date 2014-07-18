@@ -40,20 +40,23 @@ def follow():
     global state
     global readyTT
     global lastMoveTime
+    global qFollow
+    line = qFollow.get()
+    list = string.split(line)
     if not state == "following":
         print "Following."
         readyTT = False
         mess = "follow "
         try:
-            int(list[3])    #handles if a name was given as well as 
-            mess = mess + list[3]
+            if len(list) > 3:
+                int(list[3])    #handles if a name was given as well as 
+                mess = mess + list[3]
         except ValueError:
             mess = mess #need something to go in here
         mess = mess + "\n"
         sp.write(mess)
     state = "following"
-    line = qFollow.get()
-    list = string.split(line)
+    
     if list[1] == "stop":
         print "Stopping."
         readyTT = False
@@ -84,8 +87,10 @@ def follow():
         c = 0 
         d = b - 1 
     
-    while not r.isbumped():
+    if not r.isbumped():
         r.goToGoal(c,d)
+    else:
+        r.setvel(0, 0)
     lastMoveTime = time.time()
     #if r.isbumped():
       #  km.write('follow stop\n')
@@ -224,7 +229,7 @@ vm.setOnReadLine(VocalQueue)
 IPC.InitSync()
 
 # Open a serial connection to the create
-r = iRobotCreate.iRobotCreate(0, 5, "COM4")
+r = iRobotCreate.iRobotCreate(0, 5, "COM8")
 time.sleep(1)
 
 # Execute start-up commands

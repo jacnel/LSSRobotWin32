@@ -2,7 +2,7 @@ import IPC
 import sys
 import clr
 
-sys.path.append("C:\Users\Vader\Documents\Smart Spaces Robot\lssrobotwin32")
+sys.path.append("C:\Users\college\lssrobotwin32")
 
 clr.AddReference('LiliVoiceCommand')
 import SpeechRecognitionApp as sra
