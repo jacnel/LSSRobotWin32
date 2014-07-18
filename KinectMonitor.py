@@ -20,6 +20,9 @@ e = threading.Event()
 lock.release()
 track = lib.Tracker_new()
 
+curSkeletonPersonIDs = {-1:-1} #dictionary where a skeletonID is paired with a personID
+oldSkeletonPersonIDs = {-1:-1} #old version of dictionary
+
 lib.loop(track)
 
 readyCount = 0 #so face identification is run every NUM_LOOPS times
@@ -143,7 +146,41 @@ def facialActions():
         lock.acquire()
         lib.takeSnapShot(track)
         lock.release()
+        
+        lock.acquire()
         lib.detectPeople(track)
+        lock.release()
+        
+        tempSkelIDs = []
+        
+        lock.acquire()
+        for user in range(0, lib.getUsersCount(track)):
+            curSkeletonPersonIDs[lib.getUserID(track, user)] = lib.getUserPersonID(track, user) #for each user, match skeletonID to personID
+            tempSkelIDs.append(lib.getUserID(track, user))
+            
+        for key in curSkeletonPersonIDs:       #for every skeletonID that has been created
+            if not key in tempSkelIDs:     #check if it is still on screen
+                curSkeletonPersonIDs[key] = -1 #skeleton is no longer on screen
+        
+        #check for any changes in the personIDs that correspond to the skeletonIDs
+        for key in curSkeletonPersonIDs:
+            if key in oldSkeletonPersonIDs: #check skeletonIDs that were previously on screen
+                if not curSkeletonPersonIDs[key] == oldSkeletonPersonIDs[key]: #if the personID changed for a given skeletonID
+                    if curSkeletonPersonIDs[key] >= 0 and oldSkeletonPersonIDs[key] < 0:
+                        #person is now recognized
+                        p.write("face recognized " + str(key) + " " + str(curSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
+                        sys.stderr.write("recognized skeleton: " + str(key) + " as person: " + str(curSkeletonPersonIDs[key]) + "\n")
+                    elif curSkeletonPersonIDs[key] < 0 and oldSkeletonPersonIDs[key] >= 0:
+                        #recognized person has left the frame
+                        p.write("face lost " + str(key) + " " + str(oldSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
+                        sys.stderr.write("person: " + str(oldSkeletonPersonIDs[key]) + " has left vision as skeleton: " + str(key) + "\n")
+            else:
+                if curSkeletonPersonIDs[key] >= 0:
+                    #if face is recognized in one try
+                    p.write("face recognized " + str(key) + " " + str(curSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
+                    sys.stderr.write("recognized skeleton: " + str(key) + " as person: " + str(curSkeletonPersonIDs[key]) + "\n")
+        oldSkeletonPersonIDs = dict(curSkeletonPersonIDs)
+        lock.release()
        
         time.sleep(1)
                 
