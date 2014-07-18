@@ -84,8 +84,11 @@ def follow():
         c = 0 
         d = b - 1 
     
-    r.goToGoal(c,d)
+    while not r.isbumped():
+        r.goToGoal(c,d)
     lastMoveTime = time.time()
+    #if r.isbumped():
+      #  km.write('follow stop\n')
 
 # Checks if phrasesToSay.py is ready to accept another input phrase
 def checkReady():
@@ -170,7 +173,8 @@ def waveRight():
     readyTT = False
     sp.write("right\n")
     print "Moving one meter to the right."
-    r.moveTo(r.x,r.y+1,r.theta)
+    while not r.isbumped():
+        r.moveTo(r.x,r.y+1,r.theta)
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
     
@@ -181,7 +185,8 @@ def waveLeft():
     readyTT = False
     sp.write("left\n")
     print "Moving one meter to the left."
-    r.moveTo(r.x,r.y-1,r.theta)
+    while not r.isbumped():
+        r.moveTo(r.x,r.y-1,r.theta)
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
     
