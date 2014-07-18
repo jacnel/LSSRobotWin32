@@ -14,6 +14,9 @@ qGest = Queue.Queue()
 # Queue to hold the follow commands to follow the user
 qFollow = Queue.Queue()
 
+#Queue to hold the commands regarding face recognition
+qFace = Queue.Queue()
+
 #The program will continue to wait for commands to be received until quit = True
 quit = False
 
@@ -29,6 +32,9 @@ lastMoveTime = time.time()
 
 state = "waiting"
 
+#holds dictionary of recognized skeletonIDs and their personID
+skeletonPersonIDs = {-1:-1}
+
 def follow():
     global state
     global readyTT
@@ -36,7 +42,14 @@ def follow():
     if not state == "following":
         print "Following."
         readyTT = False
-        sp.write("follow\n")
+        mess = "follow "
+        try:
+            int(list[3])    #handles if a name was given as well as 
+            mess = mess + list[3]
+        except ValueError:
+            mess = mess #need something to go in here
+        mess = mess + "\n"
+        sp.write(mess)
     state = "following"
     line = qFollow.get()
     list = string.split(line)
@@ -44,7 +57,15 @@ def follow():
         print "Stopping."
         readyTT = False
         r.setvel(0,0)
-        sp.write("stopFollow\n")
+        mess = "stopFollow "
+        if len(list) > 3: #"follow stop idNum timeStamp"
+            try:
+                int(list[2])
+                mess = mess + list[2]
+            except ValueError:
+                mess = mess
+        mess = mess + "\n"
+        sp.write(mess)
         state = "waiting"
         lastMoveTime = time.time()
         return
@@ -77,6 +98,8 @@ def KinectQueue():
     line = km.line.strip()
     if line[:line.find(' ')] == "follow":
         qFollow.put(line)
+    elif line[:line.find(' ')] == "face":
+        qFace.put(line)
     else:
     #Gestures received from the Kinect Monitor will be added to the queue
         qGest.put(line)
@@ -114,6 +137,29 @@ def GestureResponse():
         waveLeft()
     if gest == "quit":
         Exit()
+
+
+#should have at least one item on qFace queue before calling this method
+def faceResponse():
+    parts = qFace.get().split() #should be of the form "face [recognized|lost] skeletonID personID timeStamp"
+    if parts[1] == "recognized":
+        #new recognized user
+        #if parts[2].isDigit() and parts[3].isDigit():
+        skeletonPersonIDs[int(parts[2])] = int(parts[3]) #add new user to dictionary
+        sp.write("hello " + parts[3] + "\n")
+        #else:
+        #    sys.stderr.write("invalid input recognized " + parts[2] + " " + parts[3] + "\n")
+    elif parts[1] == "lost":
+        #recognized user has left
+        #if parts[2].isDigit() and parts[3].isDigit():
+        del skeletonPersonIDs[int(parts[2])] #remove user that has been lost
+        sp.write("bye " + parts[3] + "\n")
+        #else:
+        #    sys.stderr.write("invalid input lost " + parts[2] + " " + parts[3] + "\n")
+    else:
+        sys.stderr.write("invalid input " + parts[1] + "\n")
+        
+        
 
 # Execute response to registered gesture
 def waveRight():
@@ -215,4 +261,6 @@ while quit == False: # The user has not asked to quit.
 # if there are items on the queue, try to respond
     if not qGest.empty():  
         GestureResponse()
+    if not qFace.empty():
+        faceResponse()
     IPC.Sync()
