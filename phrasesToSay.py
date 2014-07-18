@@ -17,8 +17,8 @@ def speak(key):
 def speakName(key, name):
     
     if key in phrases:
-        lib.typeInBaldi(name + " " + phrases[key])
-        time.sleep(.2 + delay[key])
+        lib.typeInBaldi(phrases[key] + " " + name)
+        time.sleep(.3 + delay[key])
         p.write('ready\n')
 
 def addPhrase(key, phrase, d):
@@ -30,9 +30,16 @@ def onLineRead():
     message = p.line.strip().split()
     if message[0] in phrases:
         if len(message) > 1:
-            if message[1].isDigit():
+            #if message[1].isDigit():
+            if int(message[1]) < len(names):
                 p.write('not yet\n')
                 speakName(message[0], names[int(message[1])])
+            else:
+                p.write('not yet\n')
+                speak(message[0])
+            #else:
+            #    p.write('not yet\n')
+            #    speak(message[0])
         else:
             p.write('not yet\n')
             speak(message[0])
