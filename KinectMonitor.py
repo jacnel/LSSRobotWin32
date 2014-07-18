@@ -139,7 +139,8 @@ def detect_motion():
         
 
 def facialActions():
-    global e
+    global curSkeletonPersonIDs
+    global oldSkeletonPersonIDs
     #SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE)
     #sys.stderr.write("set priority idle\n")
     while True:
