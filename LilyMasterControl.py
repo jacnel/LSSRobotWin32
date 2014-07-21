@@ -78,14 +78,14 @@ def follow():
 #    ts = float(list[3])
     #if ts < lastMoveTime:
     #    return
-    distF = 2 #distance behind person
+    distF = 1.5 #distance behind person
     
     if not a == 0:
         c = a - (distF/(1+(b/a)**2))**.5
         d = b - (b/a)*((distF/(1+(b/a)**2))**.5)
     else:
         c = 0 
-        d = b - 1 
+        d = b - distF 
     
     if not r.isbumped():
         r.goToGoal(c,d)
@@ -132,8 +132,21 @@ def GestureResponse():
         return
     # when TTS is ready, pull the next gesture off of the queue
     line = qGest.get() #line should be "command timeStamp"
-    gest = line[:line.find(' ')] #holds "command"
-    timeStamp = float(line[line.find(' ')+1:]) #holds float version of timeStamp
+    
+    parts = line.split()
+    
+    #gest = line[:line.find(' ')] #holds "command"
+    #timeStamp = float(line[line.find(' ')+1:]) #holds float version of timeStamp
+    
+    gest = parts[0]
+    timeStamp = 0.0
+    pID = -1
+    if len(parts) > 2: #line given was "gesture personID timeStamp"
+        pID = int(parts[1])
+        timeStamp = float(parts[2])
+    else:             #line given was "gesture timeStamp"
+        timeStamp = float(parts[1])
+    
     #exit if message was received during the last movement
     if not gest == 'Lily':
         if timeStamp < lastMoveTime or not state == "waiting":
@@ -141,11 +154,11 @@ def GestureResponse():
     if gest == "Lily":
         print "Yes?"
     if gest == "rightWave":
-        waveRight()
+        waveRight(pID)
     if gest == "leftWave":
-        waveLeft()
+        waveLeft(pID)
     if gest == "quit":
-        Exit()
+        Exit(pID)
 
 
 #should have at least one item on qFace queue before calling this method
@@ -171,24 +184,30 @@ def faceResponse():
         
 
 # Execute response to registered gesture
-def waveRight():
+def waveRight(personID):
     global readyTT
     global lastMoveTime
     print "Right Wave Received."
     readyTT = False
-    sp.write("right\n")
+    if personID < 0:
+        sp.write("right\n")
+    else:
+        sp.write("right " + str(personID) + "\n")
     print "Moving one meter to the right."
     if not r.isbumped():
         r.moveTo(r.x,r.y+1,r.theta)
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
     
-def waveLeft():
+def waveLeft(personID):
     global readyTT
     global lastMoveTime
     print "Left Wave Received."
     readyTT = False
-    sp.write("left\n")
+    if personID < 0:
+        sp.write("left\n")
+    else:
+        sp.write("left " + str(personID) + "\n")
     print "Moving one meter to the left."
     if not r.isbumped():
         r.moveTo(r.x,r.y-1,r.theta)
@@ -196,12 +215,15 @@ def waveLeft():
     print "DONE\n"
     
 # Close connection
-def Exit():
+def Exit(personID):
     global readyTT
     global quit
     print "Lily is going to sleep."
     readyTT = False
-    sp.write("bye\n")
+    if personID < 0:
+        sp.write("bye\n")
+    else:
+        sp.write("bye " + str(personID) + "\n")
     quit = True
     time.sleep(4)
     r.delete()  

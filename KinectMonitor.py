@@ -23,6 +23,8 @@ track = lib.Tracker_new()
 curSkeletonPersonIDs = {-1:-1} #dictionary where a skeletonID is paired with a personID
 oldSkeletonPersonIDs = {-1:-1} #old version of dictionary
 
+gestGivenPID = -1 #personID of the user who provided a gesture
+
 lib.loop(track)
 
 readyCount = 0 #so face identification is run every NUM_LOOPS times
@@ -36,6 +38,7 @@ def detect_motion():
     global userOfInt
     global quits
     global track
+    global gestGivenPID
     user = 0
     lstage = ["none"]
     rstage = ["none"]
@@ -63,6 +66,7 @@ def detect_motion():
                         lstage[user] = "none"
                         lock.acquire()
                         leftWave = True
+                        gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
                         sys.stderr.write("got left wave from user "+str(user) +"\n")
                         lock.release()
             if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)<0:
@@ -78,6 +82,7 @@ def detect_motion():
                         rstage[user] = "none"
                         lock.acquire()
                         rightWave = True
+                        gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
                         sys.stderr.write("got right wave from user "+str(user)+"\n")
                         lock.release()
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)<0:
@@ -130,6 +135,7 @@ def detect_motion():
                     quitstage[user]="none"
                     lock.acquire()
                     quits = True
+                    gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
                     sys.stderr.write("goodbye "+str(user)+"\n")
                     lock.release()
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonNeckY(track,user)<0:
@@ -221,7 +227,8 @@ while True:
         follow = False
         stopfollow = False
     if quits:
-        p.write("quit " + str(time.time()) + "\n")
+        p.write("quit " + str(gestGivenPID) + " " + str(time.time()) + "\n") #if person is unknown, master control/speaking program will handle
+        gestGivenPID = -1 #reset it to an unknown person
         exit()
     if follow:
         #sys.stderr.write(str(track) + " " + str(userOfInt) + "\n")
@@ -242,10 +249,12 @@ while True:
             stopfollow = True
     if rightWave:
         rightWave=False
-        p.write("rightWave " + str(time.time()) + "\n")
+        p.write("rightWave " + str(gestGivenPID) + " " + str(time.time()) + "\n") #if person is unknown, master control/speaking program will handle
+        gestGivenPID = -1 #reset it to an unknown person
     if leftWave:
         leftWave=False
-        p.write("leftWave " + str(time.time()) + "\n")
+        p.write("leftWave " + str(gestGivenPID) + " " + str(time.time()) + "\n") #if person is unknown, master control/speaking program will handle
+        gestGivenPID = -1 #reset it to an unknown person
     lock.release()
     e.set()
     e.clear()
