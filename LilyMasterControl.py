@@ -163,11 +163,13 @@ def GestureResponse():
 
 #should have at least one item on qFace queue before calling this method
 def faceResponse():
+    global readyTT
     parts = qFace.get().split() #should be of the form "face [recognized|lost] skeletonID personID timeStamp"
     if parts[1] == "recognized":
         #new recognized user
         #if parts[2].isDigit() and parts[3].isDigit():
         skeletonPersonIDs[int(parts[2])] = int(parts[3]) #add new user to dictionary
+        readyTT = False
         sp.write("hello " + parts[3] + "\n")
         #else:
         #    sys.stderr.write("invalid input recognized " + parts[2] + " " + parts[3] + "\n")
@@ -175,9 +177,13 @@ def faceResponse():
         #recognized user has left
         #if parts[2].isDigit() and parts[3].isDigit():
         del skeletonPersonIDs[int(parts[2])] #remove user that has been lost
+        readyTT = False
         sp.write("bye " + parts[3] + "\n")
         #else:
         #    sys.stderr.write("invalid input lost " + parts[2] + " " + parts[3] + "\n")
+    elif parts[1] == "unrecognized":
+        readyTT = False
+        sp.write("unrecognized\n")
     else:
         sys.stderr.write("invalid input " + parts[1] + "\n")
         

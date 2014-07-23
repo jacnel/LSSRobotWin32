@@ -25,6 +25,8 @@ def addPhrase(key, phrase, d):
     phrases[key] = phrase
     delay[key] = d
     
+def addPerson(name):
+    names.append(name)
 
 def onLineRead():
     message = p.line.strip().split()
@@ -52,6 +54,7 @@ phrases["bye"] = "Good bye"
 phrases["follow"] = "I am following you now"
 phrases["stopFollow"] = "I am no longer following you"
 phrases["lost"] = "I can not see you"
+phrases["unrecognized"] = "I am sorry. I do not know you"
 
 delay = {"right": 3}
 delay["left"] = 3
@@ -61,8 +64,9 @@ delay["bye"] = 2
 delay["follow"] = 3
 delay["stopFollow"] = 3.3
 delay["lost"] = 2.5
+delay["unrecognized"] = 4
 
-names = ["Daniel", "Chris"]
+names = ["Daniel", "Chris", "Cassie"]
 
 p = IPC.process(True, "phrasesToSay")
 p.setOnReadLine(onLineRead)
