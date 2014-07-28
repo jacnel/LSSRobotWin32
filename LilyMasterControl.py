@@ -1,5 +1,5 @@
 # Master Control for the LILI Robot
-# 20 June 2014
+# 28 June 2014
 
 import iRobotCreate
 import time
@@ -36,6 +36,7 @@ state = "waiting"
 #holds dictionary of recognized skeletonIDs and their personID
 skeletonPersonIDs = {-1:-1}
 
+#handles values from the qFollow queue
 def follow():
     global state
     global readyTT
@@ -52,7 +53,7 @@ def follow():
                 int(list[3])    #handles if a name was given as well as 
                 mess = mess + list[3]
         except ValueError:
-            mess = mess #need something to go in here
+            mess = mess #need something to go in hthe except block
         mess = mess + "\n"
         sp.write(mess)
     state = "following"
@@ -60,7 +61,7 @@ def follow():
     if list[1] == "stop":
         print "Stopping."
         readyTT = False
-        r.setvel(0,0)
+        r.setvel(0,0) #stop robot motion
         mess = "stopFollow "
         if len(list) > 3: #"follow stop idNum timeStamp"
             try:
@@ -75,11 +76,10 @@ def follow():
         return
     a = float(list[1])
     b = float(list[2])
-#    ts = float(list[3])
-    #if ts < lastMoveTime:
-    #    return
+
     distF = 1.5 #distance behind person
     
+    #find the point 1.5 meters behind the user on a straight line between the user and the robot
     if not a == 0:
         c = a - (distF/(1+(b/a)**2))**.5
         d = b - (b/a)*((distF/(1+(b/a)**2))**.5)
@@ -87,13 +87,13 @@ def follow():
         c = 0 
         d = b - distF 
     
+    #stop moving if bump sensor is being pressed, does not stop following
     if not r.isbumped():
         r.goToGoal(c,d)
     else:
         r.setvel(0, 0)
     lastMoveTime = time.time()
-    #if r.isbumped():
-      #  km.write('follow stop\n')
+    
 
 # Checks if phrasesToSay.py is ready to accept another input phrase
 def checkReady():
@@ -103,6 +103,7 @@ def checkReady():
     if ready=="ready":
         readyTT=True
 
+#adds command from KinectMonitor onto appropriate queue
 def KinectQueue():
     line = km.line.strip()
     if line[:line.find(' ')] == "follow":
@@ -113,6 +114,7 @@ def KinectQueue():
     #Gestures received from the Kinect Monitor will be added to the queue
         qGest.put(line)
 
+#adds command from VoiceMonitor onto appropriate queue
 def VocalQueue():
     global state
     line = vm.line.strip()
@@ -131,23 +133,21 @@ def GestureResponse():
     if readyTT==False:
         return
     # when TTS is ready, pull the next gesture off of the queue
-    line = qGest.get() #line should be "command timeStamp"
+    line = qGest.get() #line should be "command timeStamp" or "command personID timeStamp"
     
     parts = line.split()
-    
-    #gest = line[:line.find(' ')] #holds "command"
-    #timeStamp = float(line[line.find(' ')+1:]) #holds float version of timeStamp
     
     gest = parts[0]
     timeStamp = 0.0
     pID = -1
-    if len(parts) > 2: #line given was "gesture personID timeStamp"
+    if len(parts) > 2: #line given was "command personID timeStamp"
         pID = int(parts[1])
         timeStamp = float(parts[2])
-    else:             #line given was "gesture timeStamp"
+    else:             #line given was "command timeStamp"
         timeStamp = float(parts[1])
     
-    #exit if message was received during the last movement
+    #exit if message was received during the last movement or is not in a waiting state
+    #otherwise execute the correct command response
     if not gest == 'Lily':
         if timeStamp < lastMoveTime or not state == "waiting":
             return
@@ -167,21 +167,20 @@ def faceResponse():
     parts = qFace.get().split() #should be of the form "face [recognized|lost] skeletonID personID timeStamp"
     if parts[1] == "recognized":
         #new recognized user
-        #if parts[2].isDigit() and parts[3].isDigit():
+        
         skeletonPersonIDs[int(parts[2])] = int(parts[3]) #add new user to dictionary
         readyTT = False
         sp.write("hello " + parts[3] + "\n")
-        #else:
-        #    sys.stderr.write("invalid input recognized " + parts[2] + " " + parts[3] + "\n")
+        
     elif parts[1] == "lost":
         #recognized user has left
-        #if parts[2].isDigit() and parts[3].isDigit():
+        
         del skeletonPersonIDs[int(parts[2])] #remove user that has been lost
         readyTT = False
         sp.write("bye " + parts[3] + "\n")
-        #else:
-        #    sys.stderr.write("invalid input lost " + parts[2] + " " + parts[3] + "\n")
+        
     elif parts[1] == "unrecognized":
+        #user has been marked as unkown and no more attempts will be made to recognize them
         readyTT = False
         sp.write("unrecognized\n")
     else:
@@ -190,48 +189,54 @@ def faceResponse():
         
 
 # Execute response to registered gesture
+#personID should be an integer representing the ID number for the person's face
 def waveRight(personID):
     global readyTT
     global lastMoveTime
     print "Right Wave Received."
     readyTT = False
+    #check to see if person who gave wave is known
     if personID < 0:
         sp.write("right\n")
     else:
         sp.write("right " + str(personID) + "\n")
     print "Moving one meter to the right."
     if not r.isbumped():
-        r.moveTo(r.x,r.y+1,r.theta)
+        r.moveTo(r.x,r.y+1,r.theta) #is a blocking method call
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
-    
+
+#personID should be an integer representing the ID number for the person's face    
 def waveLeft(personID):
     global readyTT
     global lastMoveTime
     print "Left Wave Received."
     readyTT = False
+    #check to see if person who gave wave is known
     if personID < 0:
         sp.write("left\n")
     else:
         sp.write("left " + str(personID) + "\n")
     print "Moving one meter to the left."
     if not r.isbumped():
-        r.moveTo(r.x,r.y-1,r.theta)
+        r.moveTo(r.x,r.y-1,r.theta) #is a blocking method call
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
     
 # Close connection
+#personID should be an integer representing the ID number for the person's face
 def Exit(personID):
     global readyTT
     global quit
     print "Lily is going to sleep."
     readyTT = False
+    #check to see if person who gave command is known
     if personID < 0:
         sp.write("bye\n")
     else:
         sp.write("bye " + str(personID) + "\n")
     quit = True
-    time.sleep(4)
+    time.sleep(4) #to allow all subprocesses to close
     r.delete()  
 
 
@@ -257,7 +262,7 @@ vm.setOnReadLine(VocalQueue)
 IPC.InitSync()
 
 # Open a serial connection to the create
-r = iRobotCreate.iRobotCreate(0, 5, "COM8")
+r = iRobotCreate.iRobotCreate(0, 5, "COM3")
 time.sleep(1)
 
 # Execute start-up commands
@@ -286,16 +291,10 @@ while quit == False: # The user has not asked to quit.
     if not qFollow.empty():
         follow()
     else:
+        #stop following if the KinectMonitor stops sending values
         if state == "following":
             km.write('follow stop\n')
-            #qFollow.put('follow stop\n')
-            #follow()
-            #print "Stopping."
-            #readyTT = False
-            #r.setvel(0,0)
-            #sp.write("lost\n")
-            #state = "waiting"
-            #lastMoveTime = time.time()
+            
             
 # if there are items on the queue, try to respond
     if not qGest.empty():  
