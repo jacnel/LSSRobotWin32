@@ -48,6 +48,7 @@ def detect_motion():
     stopfollstage = ["none"]
     quitstage = ["none"]
     while True:
+        e.wait()   #pauses thread if main thread flag is cleared
         lock.acquire()
         lib.loop(track)
         lock.release()
@@ -152,6 +153,7 @@ def facialActions():
     global personIDAttempts
     
     while True:
+        e.wait()   #pauses thread if main thread flag is cleared
         lock.acquire()
         lib.takeSnapShot(track)
         lib.detectPeople(track)
@@ -204,7 +206,7 @@ def facialActions():
         oldSkeletonPersonIDs = dict(curSkeletonPersonIDs)
         lock.release()
        
-        time.sleep(1)
+        time.sleep(.5)
                 
                                 
 def handleLine():
@@ -223,6 +225,10 @@ def handleLine():
     elif p.line == "follow stop\n":
         stopfollow = True
         sys.stderr.write("got stop follow\n")
+    elif p.line == "sleep\n":
+        e.clear()  #pauses the other threads until ready for them to start again
+    elif p.line == "wake\n":
+        e.set()    #allows other threads to continue
     else:
         sys.stderr.write("handle line " + p.line)
 
@@ -271,6 +277,5 @@ while True:
         p.write("leftWave " + str(gestGivenPID) + " " + str(time.time()) + "\n") #if person is unknown, master control/speaking program will handle
         gestGivenPID = -1 #reset it to an unknown person
     lock.release()
-    e.set()
-    e.clear()
+    
     Sync()

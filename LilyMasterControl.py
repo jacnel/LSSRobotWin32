@@ -202,7 +202,9 @@ def waveRight(personID):
         sp.write("right " + str(personID) + "\n")
     print "Moving one meter to the right."
     if not r.isbumped():
+        km.write("sleep\n")  #stop the kinect monitor actions while movement is happening
         r.moveTo(r.x,r.y+1,r.theta) #is a blocking method call
+        km.write("wake\n")   #start kinect monitor again
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
 
@@ -219,7 +221,9 @@ def waveLeft(personID):
         sp.write("left " + str(personID) + "\n")
     print "Moving one meter to the left."
     if not r.isbumped():
+        km.write("sleep\n")  #stop the kinect monitor actions while movement is happening
         r.moveTo(r.x,r.y-1,r.theta) #is a blocking method call
+        km.write("wake\n")   #start kinect monitor again
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
     
