@@ -42,28 +42,28 @@ def detect_motion():
     global track
     global gestGivenPID
     user = 0
-    lstage = ["none"]
-    rstage = ["none"]
-    follstage = ["none"]
-    stopfollstage = ["none"]
-    quitstage = ["none"]
+    lstage = ["none"] #array of states for left wave.  Each stage is for one person.
+    rstage = ["none"] #array of states for right wave.
+    follstage = ["none"] #array of states for follow.
+    stopfollstage = ["none"] #array of states for  stop follow.
+    quitstage = ["none"]  #array of states for quit.
     while True:
         e.wait()   #pauses thread if main thread flag is cleared
         lock.acquire()
-        lib.loop(track)
+        lib.loop(track)  #grab a new 3D frame
         lock.release()
         for user in range(0,lib.getUsersCount(track)):
             if len(lstage)<=user:
-                lstage.append("none")
+                lstage.append("none") #there is an additional user, we need more state variables
                 rstage.append("none")
                 follstage.append("none")
                 quitstage.append("none")
                 stopfollstage.append("none")
-            if lstage[user]=="none":
+            if lstage[user]=="none":  #nothing has happened yet, check if the arm is in a position of interest
                 if lib.getUserSkeletonL_HandX(track,user)-lib.getUserSkeletonL_ElbowX(track,user)>100:
                     if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0:
                         lstage[user] = "ready"
-            if lstage[user]=="ready":
+            if lstage[user]=="ready":#we hit one point of interest, move to the next if the arm has met the new POI
                 if lib.getUserSkeletonL_ElbowX(track,user)-lib.getUserSkeletonL_HandX(track,user)>100:
                     if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0:
                         lstage[user] = "none"
@@ -73,13 +73,13 @@ def detect_motion():
                         sys.stderr.write("got left wave from user "+str(user) +"\n")
                         lock.release()
             if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)<0:
-                lstage[user] = "none"
+                lstage[user] = "none"#we hit a point that is un acceptable for this gesture, cancel it
                 
-            if rstage[user]=="none":
+            if rstage[user]=="none":#nothing has happened yet, check if the arm is in a position of interest
                 if lib.getUserSkeletonR_HandX(track,user)-lib.getUserSkeletonR_ElbowX(track,user)<-100:
                     if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)>0:
                         rstage[user] = "ready"
-            if rstage[user]=="ready":
+            if rstage[user]=="ready":#we hit one point of interest, move to the next if the arm has met the new POI
                 if lib.getUserSkeletonR_ElbowX(track,user)-lib.getUserSkeletonR_HandX(track,user)<-100:
                     if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)>0:
                         rstage[user] = "none"
@@ -89,12 +89,13 @@ def detect_motion():
                         sys.stderr.write("got right wave from user "+str(user)+"\n")
                         lock.release()
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)<0:
-                rstage[user] = "none"
-            if follstage[user]=="none":
+                rstage[user] = "none"#we hit a point that is un acceptable for this gesture, cancel it
+                
+            if follstage[user]=="none":#nothing has happened yet, check if the arm is in a position of interest
                 if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))<100:
                     if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))>300:
                         follstage[user] = "ext"
-            if follstage[user]=="ext":
+            if follstage[user]=="ext":#we hit one point of interest, move to the next if the arm has met the new POI
                 if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))<100:
                     if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))<150:
                         follstage[user]="none"
@@ -104,17 +105,17 @@ def detect_motion():
                         sys.stderr.write("got follow from user "+str(user)+"\n")
                         lock.release()
             if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))>100:
-                follstage[user]="none"
+                follstage[user]="none" #invalid for the follow gesture
             if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
-                follstage[user]="none"
+                follstage[user]="none"#invalid for the follow gesture
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
-                follstage[user]="none"
+                follstage[user]="none"#invalid for the follow gesture
 
-            if stopfollstage[user]=="none":
+            if stopfollstage[user]=="none":#nothing has happened yet, check if the arm is in a position of interest
                 if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))<100:
                     if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))<150:
                         stopfollstage[user] = "close"
-            if stopfollstage[user]=="close":
+            if stopfollstage[user]=="close":#we hit one point of interest, move to the next if the arm has met the new POI
                 if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))<100:
                     if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))>300:
                         stopfollstage[user]="none"
@@ -124,16 +125,16 @@ def detect_motion():
                         sys.stderr.write("got stop follow from user "+str(user)+"\n")
                         lock.release()
             if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))>100:
-                stopfollstage[user]="none"
+                stopfollstage[user]="none"#invalid for the stop follow gesture
             if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
-                stopfollstage[user]="none"
+                stopfollstage[user]="none"#invalid for the stop follow gesture
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
-                stopfollstage[user]="none"
+                stopfollstage[user]="none"#invalid for the stop follow gesture
                     
-            if quitstage[user]=="none":
+            if quitstage[user]=="none":#nothing has happened yet, check if the arm is in a position of interest
                 if lib.getUserSkeletonR_HandX(track,user)-lib.getUserSkeletonNeckX(track,user)<-50:
                     quitstage[user]="scut"
-            if quitstage[user]=="scut":
+            if quitstage[user]=="scut":#we hit one point of interest, move to the next if the arm has met the new POI
                 if lib.getUserSkeletonR_HandX(track,user)-lib.getUserSkeletonNeckX(track,user)>50:
                     quitstage[user]="none"
                     lock.acquire()
@@ -142,9 +143,9 @@ def detect_motion():
                     sys.stderr.write("goodbye "+str(user)+"\n")
                     lock.release()
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonNeckY(track,user)<0:
-                quitstage[user]="none"
+                quitstage[user]="none"#invalid for the quit gesture
             if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonHeadY(track,user)>0:
-                quitstage[user]="none"
+                quitstage[user]="none"#invalid for the quit gesture
         
 
 def facialActions():
