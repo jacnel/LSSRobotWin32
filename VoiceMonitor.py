@@ -36,7 +36,7 @@ while not started:
 
 while re.Listening == True: #while listening
    index = re.grabCommand()  #access recognized command
-   if not index == -1:
+   if not index == -1: #-1 means queue is empty
        if index == 5: #index 5 is a quit command
            re.stopListening(engine)
        vm.write(str(commands[index])+'\n')
