@@ -50,10 +50,10 @@ def follow():
         mess = "follow "
         try:
             if len(list) > 3:
-                int(list[3])    #handles if a name was given as well as 
+                int(list[3])    #handles if a name was given also
                 mess = mess + list[3]
         except ValueError:
-            mess = mess #need something to go in hthe except block
+            mess = mess #need something to go in the except block
         mess = mess + "\n"
         sp.write(mess)
     state = "following"
@@ -204,7 +204,8 @@ def waveRight(personID):
     if not r.isbumped():
         km.write("sleep\n")  #stop the kinect monitor actions while movement is happening
         r.moveTo(r.x,r.y+1,r.theta) #is a blocking method call
-        km.write("wake\n")   #start kinect monitor again
+    r.setvel(0,0) #make sure robot has stopped
+    km.write("wake\n")   #start kinect monitor again
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
 
@@ -223,7 +224,8 @@ def waveLeft(personID):
     if not r.isbumped():
         km.write("sleep\n")  #stop the kinect monitor actions while movement is happening
         r.moveTo(r.x,r.y-1,r.theta) #is a blocking method call
-        km.write("wake\n")   #start kinect monitor again
+    r.setvel(0,0)
+    km.write("wake\n")   #start kinect monitor again
     lastMoveTime = time.time() #update lastMoveTime
     print "DONE\n"
     
@@ -240,7 +242,7 @@ def Exit(personID):
     else:
         sp.write("bye " + str(personID) + "\n")
     quit = True
-    time.sleep(4) #to allow all subprocesses to close
+    time.sleep(5) #to allow all subprocesses to close
     r.delete()  
 
 
@@ -284,7 +286,6 @@ readyTT = False
 print "Lily is ready!"
 #command TTS
 sp.write("query\n")
-#vm.write('True')
 
 #Waiting state: search for gestures from the kinect monitor
 while quit == False: # The user has not asked to quit.
@@ -298,7 +299,6 @@ while quit == False: # The user has not asked to quit.
         #stop following if the KinectMonitor stops sending values
         if state == "following":
             km.write('follow stop\n')
-            
             
 # if there are items on the queue, try to respond
     if not qGest.empty():  
