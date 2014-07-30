@@ -287,6 +287,9 @@ print "Lily is ready!"
 #command TTS
 sp.write("query\n")
 
+#start VoiceMonitor listening
+vm.write("start\n")
+
 #Waiting state: search for gestures from the kinect monitor
 while quit == False: # The user has not asked to quit.
     vm.tryReadLine()  # receive input from the voice monitor
