@@ -5,7 +5,7 @@ Setting up Talking Avatar
 		--you will need to fill out the registration form
 		--select all c source code options and any languages you would like to use
 		
--use the "bsync.tcl" and copy and paste it over C:\Program Files\CSLU\Toolkit\2.0\script\bsync_1.0\bsync.tcl
+-use the "bsync.tcl" in the LSSRobotWin32 repository and copy and paste it over C:\Program Files\CSLU\Toolkit\2.0\script\bsync_1.0\bsync.tcl
 -run the "baldi sync" application to get the face window and the TTS window
 	-if no short cut is found go to C:\Program Files\CSLU\Toolkit\2.0\apps and set the baldiSync.tcl file's
 		default program to wish80.exe (C:\Program Files\CSLU\Tcl80\bin)
