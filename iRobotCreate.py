@@ -226,12 +226,14 @@ class iRobotCreate:
         else:
             raise InputError('Method cannot be called while in simulation mode')
 
+    #Added by CLG
     #returns position in x, y, theta            
     def whereAmI(self):
         """returns current position"""
         coordinates = [self.x, self.y, self.theta]
         return coordinates
 
+    #Added by CJG
     #returns difference between -pi and pi        
     def angleSub(self, startAng, endAng):
         #startAng and endAng must be in radians
@@ -242,6 +244,7 @@ class iRobotCreate:
             alpha += (2 * np.pi)
         return alpha
 
+    #Added by CJG and CLG
     #move to a point x, y, theta (rads)
     def moveTo(self, nx, ny, ntheta):
         """moves to a point"""
@@ -252,20 +255,25 @@ class iRobotCreate:
         if ntheta > np.pi:
             ntheta -= 2*np.pi
         
+        #finds the angle between current and new point
         alpha = math.atan2(dY, dX)
+        #decides to rotate and move or stay in place
         if not math.fabs(dX) < .01 or not math.fabs(dY) < .01: 
             self.rotate(self.angleSub(self.theta, alpha))
             dist = np.sqrt(dX**2 + dY**2)
             self.forward(dist)
         else:
             alpha = self.theta
-
+        
+        #final rotation to new point
         self.rotate(self.angleSub(alpha, ntheta))
         self.x = nx
         self.y = ny
         self.theta = ntheta
 
+    #Added by CLG
     def trajectory(self):     
+        #create table of all end points from current point
         x = np.zeros(11)
         y = np.zeros(11)
         theta = np.zeros(11) 
@@ -286,25 +294,25 @@ class iRobotCreate:
                     self.xcoord[vdex][odex] = x[10]
                     self.ycoord[vdex][odex] = y[10]
                         
-
-    def goToGoal(self, xGoal, yGoal):
-        
-        #create table of all end points from current point
-        #endXVals = self.xcoord + self.x
-        #endYVals = self.ycoord + self.y        
-        
+    #Added by CJG
+    #trajectory method must be called before use
+    def goToGoal(self, xGoal, yGoal):    
         #should be a 6 x 11 matrix of distances between trajectory end points and goal points
         dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
         
+        #finds the point at which minimum cost occurs
+        #if cost is <.1, it does not move
         if(dist.flatten().argmin() < .1):
             self.setvel(0,0)
             return;
         
         index = dist.flatten().argmin()
         
+        #find row and column of minimum value based off of flattened index
         rowNum = index/11
         colNum = index % 11
         
+        #move
         self.setvel(self.v[rowNum],self.omega[colNum])
            
 
@@ -498,12 +506,15 @@ class iRobotCreate_real:
         print 'Gracefully Exiting! Create connection Terminated. \nOpen up a new connection to continue using the Create.\n'
         sys.exit(0)
 
+
+    #Added by CLG
     #returns position in x, y, theta            
     def whereAmI(self):
         """returns current position"""
         coordinates = [self.x, self.y, self.theta]
         return coordinates
 
+    #Added by CJG
     #returns difference between -pi and pi        
     def angleSub(self, startAng, endAng):
         #startAng and endAng must be in radians
@@ -514,6 +525,7 @@ class iRobotCreate_real:
             alpha += (2 * np.pi)
         return alpha
 
+    #Added by CJG and CLG
     #move to a point x, y, theta (rads)
     def moveTo(self, nx, ny, ntheta):
         """moves to a point"""
@@ -524,19 +536,65 @@ class iRobotCreate_real:
         if ntheta > np.pi:
             ntheta -= 2*np.pi
         
+        #finds the angle between current and new point
         alpha = math.atan2(dY, dX)
+        #decides to rotate and move or stay in place
         if not math.fabs(dX) < .01 or not math.fabs(dY) < .01: 
             self.rotate(self.angleSub(self.theta, alpha))
             dist = np.sqrt(dX**2 + dY**2)
             self.forward(dist)
         else:
             alpha = self.theta
-
+        
+        #final rotation to new point
         self.rotate(self.angleSub(alpha, ntheta))
         self.x = nx
         self.y = ny
         self.theta = ntheta
-                    
+
+    #Added by CLG
+    def trajectory(self):     
+        #create table of all end points from current point
+        x = np.zeros(11)
+        y = np.zeros(11)
+        theta = np.zeros(11) 
+        
+        horizon = 2
+        dt = 0.2
+        num_steps = int(horizon/dt)
+        
+        for vdex in range(0, 6):
+            for odex in range (0, 11):
+                for index in range(1,num_steps+1):
+                    x[index] = x[index-1] + self.v[vdex]*np.cos(theta[index-1])*dt
+                    y[index] = y[index-1] + self.v[vdex]*np.sin(theta[index-1])*dt
+                    theta[index] = theta[index-1] + self.omega[odex]*dt
+                if vdex==5 and not odex ==5:
+                    continue
+                else:   
+                    self.xcoord[vdex][odex] = x[10]
+                    self.ycoord[vdex][odex] = y[10]
+                        
+    #Added by CJG
+    #trajectory method must be called before use
+    def goToGoal(self, xGoal, yGoal):    
+        #should be a 6 x 11 matrix of distances between trajectory end points and goal points
+        dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
+        
+        #finds the point at which minimum cost occurs
+        #if cost is <.1, it does not move
+        if(dist.flatten().argmin() < .1):
+            self.setvel(0,0)
+            return;
+        
+        index = dist.flatten().argmin()
+        
+        #find row and column of minimum value based off of flattened index
+        rowNum = index/11
+        colNum = index % 11
+        
+        #move
+        self.setvel(self.v[rowNum],self.omega[colNum])                    
     
 class Error(Exception):
     """Base class for exceptions in this module."""
