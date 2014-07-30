@@ -147,6 +147,7 @@ def GestureResponse():
         timeStamp = float(parts[2])
     else:             #line given was "command timeStamp"
         timeStamp = float(parts[1])
+        pID = -3 #not a number that might be passed from KinectMonitor (those are either -2 or -1)
     
     #exit if message was received during the last movement or is not in a waiting state
     #otherwise execute the correct command response
@@ -198,10 +199,13 @@ def waveRight(personID):
     print "Right Wave Received."
     readyTT = False
     #check to see if person who gave wave is known
-    if personID < 0:
+    if personID == -3:
         sp.write("right\n")
-    else:
+    elif personID >= 0:
         sp.write("right " + str(personID) + "\n")
+    else:
+        readyTT = True
+        return #gesture came from KinectMonitor and user is unrecognized should not execute command
     print "Moving one meter to the right."
     if not r.isbumped():
         km.write("sleep\n")  #stop the kinect monitor actions while movement is happening
@@ -218,10 +222,13 @@ def waveLeft(personID):
     print "Left Wave Received."
     readyTT = False
     #check to see if person who gave wave is known
-    if personID < 0:
+    if personID == -3:
         sp.write("left\n")
-    else:
+    elif personID >= 0:
         sp.write("left " + str(personID) + "\n")
+    else:
+        readyTT = True
+        return #gesture came from KinectMonitor and user is unrecognized should not execute command
     print "Moving one meter to the left."
     if not r.isbumped():
         km.write("sleep\n")  #stop the kinect monitor actions while movement is happening
@@ -239,10 +246,13 @@ def Exit(personID):
     print "Lily is going to sleep."
     readyTT = False
     #check to see if person who gave command is known
-    if personID < 0:
+    if personID == -3:
         sp.write("bye\n")
-    else:
+    elif personID >= 0:
         sp.write("bye " + str(personID) + "\n")
+    else:
+        readyTT = True
+        return #gesture came from KinectMonitor and user is unrecognized should not execute command
     quit = True
     time.sleep(5) #to allow all subprocesses to close
     r.delete()  

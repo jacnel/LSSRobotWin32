@@ -241,6 +241,7 @@ sys.stderr.write("starting KM process\n")
 p = process(True,"KM")
 p.setOnReadLine(handleLine)
 InitSync()
+e.set()
 while True:
     p.tryReadLine()
     lock.acquire()
