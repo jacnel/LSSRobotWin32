@@ -13,6 +13,7 @@ recoged = ['Lily', 'Move right', 'Move left', 'Follow me', 'Stop', 'Goodbye'] #r
 vm = IPC.process(True, 'VoiceMonitor.py')
 
 started = False #changes once it gets start command from master controller
+Lily = False
 
 re = sra.Program()
 engine = re.buildRecognizer() #create Speech Recognition Engine
@@ -36,8 +37,12 @@ while not started:
 
 while re.Listening == True: #while listening
    index = re.grabCommand()  #access recognized command
-   if not index == -1: #-1 means queue is empty
-       if index == 5: #index 5 is a quit command
-           re.stopListening(engine)
-       vm.write(str(commands[index])+'\n')
-       sys.stderr.write("Recognized Phrase "+str(recoged[index]) +"\n")
+   if index == 0:
+       Lily = True
+   elif Lily == True:
+       if not index == -1: #-1 means queue is empty
+            if index == 5: #index 5 is a quit command
+                re.stopListening(engine)
+            vm.write(str(commands[index])+'\n')
+            sys.stderr.write("Recognized Phrase "+str(recoged[index]) +"\n")
+            Lily = False
