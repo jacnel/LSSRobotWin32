@@ -27,7 +27,7 @@ def onLineRead():
         started = True  #changes to exit first while loop
 
 vm.setOnReadLine(onLineRead)
-
+IPC.InitSync()
 #keep checking if it should start listening
 while not started:
     vm.tryReadLine()
