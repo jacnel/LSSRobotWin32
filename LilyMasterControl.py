@@ -44,7 +44,7 @@ def follow():
     global qFollow
     line = qFollow.get()
     list = string.split(line)
-    if not state == "following":
+    if not state == "following": #LILI just started following user
         print "Following."
         readyTT = False
         mess = "follow "
@@ -58,7 +58,7 @@ def follow():
         sp.write(mess)
     state = "following"
     
-    if list[1] == "stop":
+    if list[1] == "stop": #LILI received a stop command or has lost track of the user
         print "Stopping."
         readyTT = False
         r.setvel(0,0) #stop robot motion
@@ -74,8 +74,8 @@ def follow():
         state = "waiting"
         lastMoveTime = time.time()
         return
-    a = float(list[1])
-    b = float(list[2])
+    a = float(list[1]) #x coordinate of user relative to LILI
+    b = float(list[2]) #y coordinate of user relative to LILI
 
     distF = 1.5 #distance behind person
     
@@ -83,7 +83,7 @@ def follow():
     if not a == 0:
         c = a - (distF/(1+(b/a)**2))**.5
         d = b - (b/a)*((distF/(1+(b/a)**2))**.5)
-    else:
+    else: #user is directly in front of LILI
         c = 0 
         d = b - distF 
     
@@ -100,15 +100,15 @@ def checkReady():
     global readyTT
     #reads the output from the TTS program
     ready = sp.line.strip()
-    if ready=="ready":
-        readyTT=True
+    if ready=="ready": 
+        readyTT=True #TTS program is ready to speak again
 
 #adds command from KinectMonitor onto appropriate queue
 def KinectQueue():
     line = km.line.strip()
-    if line[:line.find(' ')] == "follow":
+    if line[:line.find(' ')] == "follow": #all information regarding following starts with the word "follow"
         qFollow.put(line)
-    elif line[:line.find(' ')] == "face":
+    elif line[:line.find(' ')] == "face": #all information regarding faces start with the word "face"
         qFace.put(line)
     else:
     #Gestures received from the Kinect Monitor will be added to the queue
@@ -118,6 +118,7 @@ def KinectQueue():
 def VocalQueue():
     global state
     line = vm.line.strip()
+    #follow information must be writeen to KinectMonitor so that it will start sending information about user location
     if line == "follow":
         km.write('follow\n')
     if line == "stop":
@@ -127,6 +128,7 @@ def VocalQueue():
         qGest.put(line + ' ' + str(time.time()))
 
 # Search for gesture
+#should have at least one item on qGest before calling this method
 def GestureResponse():
     global readyTT
     # if the TTS is busy, exit this loop
@@ -135,9 +137,9 @@ def GestureResponse():
     # when TTS is ready, pull the next gesture off of the queue
     line = qGest.get() #line should be "command timeStamp" or "command personID timeStamp"
     
-    parts = line.split()
+    parts = line.split() #splits on whitespace by default
     
-    gest = parts[0]
+    gest = parts[0] #gesture command is the first word
     timeStamp = 0.0
     pID = -1
     if len(parts) > 2: #line given was "command personID timeStamp"
@@ -149,9 +151,9 @@ def GestureResponse():
     #exit if message was received during the last movement or is not in a waiting state
     #otherwise execute the correct command response
     if not gest == 'Lily':
-        if timeStamp < lastMoveTime or not state == "waiting":
+        if timeStamp < lastMoveTime or not state == "waiting": #gesture received during another gesture execution
             return
-    if gest == "Lily":
+    if gest == "Lily": 
         print "Yes?"
     if gest == "rightWave":
         waveRight(pID)
@@ -296,7 +298,7 @@ while quit == False: # The user has not asked to quit.
     km.tryReadLine()  # receive input from the kinect monitor
     sp.tryReadLine()  # receive input from the TTS
     
-    if not qFollow.empty():
+    if not qFollow.empty(): #if there is a command in the qFollow queue
         follow()
     else:
         #stop following if the KinectMonitor stops sending values

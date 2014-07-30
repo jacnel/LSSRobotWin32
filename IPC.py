@@ -4,7 +4,7 @@ import sys
 from threading  import Thread
 from Queue import Queue, Empty
 refreshRate = 5 #Hz
-warn = False
+warn = False #set to True if you want warning messages to display
 def enqueue_output(out, queue):
     for line in iter(out.readline, b''):
         queue.put(line)
@@ -42,15 +42,17 @@ class process:
             sys.stdout.write(data)
             sys.stdout.flush()
 
+#sets up initial time to sync from
 def InitSync():
     global oldTime
     oldTime=time.time()
+#makes sure process is not running at a higher rate than the refresh rate
 def Sync():
     global oldTime
     curTime = time.time()
-    if curTime-oldTime<1.0/refreshRate:
+    if curTime-oldTime<1.0/refreshRate: #if process is keeping up
         time.sleep(1.0/refreshRate - (curTime-oldTime))
-    else:
+    else: #if process is falling behind
         if warn:
-            sys.stderr.write("tester Falling behind!!!\n")
+            sys.stderr.write("Falling behind!!!\n")
     oldTime=time.time()
