@@ -265,9 +265,9 @@ while True:
         if user>=0: #we found the user
             if lib.isUserTracked(track, user):
                 #sys.stderr.write("is following\n")
-                if userOfInt in curSkeletonPersonIDs.keys() and curSkeletonPersonIDs[userOfInt] >= 0:
+                if userOfInt in curSkeletonPersonIDs.keys() and curSkeletonPersonIDs[userOfInt] >= 0: #user is recognized and skeletonID should be sent
                     p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(userOfInt) + " " + str(time.time()) + "\n")
-                else:
+                else: #user is unrecognized, send anyways in case follow was started by voice command and let the master control handle. should not send skeletonID.
                     p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(time.time()) + "\n")
             else:#they aren't tracked
                 stopfollow = True
