@@ -181,6 +181,7 @@ def faceResponse():
         
         skeletonPersonIDs[int(parts[2])] = int(parts[3]) #add new user to dictionary
         readyTT = False
+        sys.stderr.write("person is " + parts[3] + "\n")
         sp.write("hello " + parts[3] + "\n")
         
     elif parts[1] == "lost":
