@@ -7,8 +7,8 @@ sys.path.append("C:\Users\vader\Documents\lssrobotwin32")
 clr.AddReference('LiliVoiceCommand')
 import SpeechRecognitionApp as sra
 
-commands = ['Lily', 'rightWave', 'leftWave', 'follow', 'stop', 'quit'] #gesture commands
-recoged = ['Lily', 'Move right', 'Move left', 'Follow me', 'Stop', 'Goodbye'] #recognized phrases
+commands = ['Lily', 'rightWave', 'leftWave', 'follow', 'stop', 'turnAround', 'quit'] #gesture commands
+recoged = ['Lily', 'Move right', 'Move left', 'Follow me', 'Stop', 'Turn around', 'Goodbye'] #recognized phrases
 
 vm = IPC.process(True, 'VoiceMonitor.py')
 
@@ -39,7 +39,7 @@ while re.Listening == True: #while listening
        Lily = True
    elif Lily == True:
        if not index == -1: #-1 means queue is empty
-            if index == 5: #index 5 is a quit command
+            if index == 6: #index 6 is a quit command
                 re.stopListening(engine)
             vm.write(str(commands[index])+'\n')
             sys.stderr.write("Recognized Phrase "+str(recoged[index]) +"\n")
