@@ -7,6 +7,7 @@ import IPC
 import Queue
 import string
 import sys
+import numpy as np
 
 # qGest is a Queue which holds commands for gestures sent from the Kinect monitor
 #    these commands are pulled off the queue when all processes are ready
@@ -170,6 +171,8 @@ def GestureResponse():
         waveLeft(pID)
     if gest == "quit":
         Exit(pID)
+    if gest == "turnAround":
+        turnAround()
 
 
 #should have at least one item on qFace queue before calling this method
@@ -265,6 +268,19 @@ def Exit(personID):
     time.sleep(5) #to allow all subprocesses to close
     r.delete()  
 
+#turns LILI 180 degrees to face the other direction
+def turnAround():
+    global readyTT
+    global lastMoveTime
+    print "Turn around received"
+    readyTT = False
+    if not r.isbumped():
+        km.write("sleep\n")
+        r.rotate(np.pi) #rotate 180 degrees
+    r.setvel(0,0)
+    km.write("wake\n")
+    lastMoveTime = time.time()
+    
 
 # How to search for a gesture
     #open communication to the kinect monitor

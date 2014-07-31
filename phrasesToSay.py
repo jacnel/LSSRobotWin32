@@ -34,7 +34,7 @@ def addPerson(name):
 
 def onLineRead():
     message = p.line.strip().split()
-    if message[0] in phrases:
+    if message[0] in phrases and message[0] in delay:
         if len(message) > 1:
             if int(message[1]) < len(names):  #means a valid person ID was passed as well as a key
                 p.write('not yet\n')  #tell master controller that a phrase is still being spoken
@@ -46,6 +46,8 @@ def onLineRead():
             p.write('not yet\n')
             speak(message[0])
     
+#keys for phrases and delay should all match
+    
 #set of initial phrases                
 phrases = {"right": "I am moving to your right"}
 phrases["left"] = "I am moving to your left"
@@ -56,6 +58,7 @@ phrases["follow"] = "I am following you now"
 phrases["stopFollow"] = "I am no longer following you"
 phrases["lost"] = "I can not see you"
 phrases["unrecognized"] = "I am sorry. I do not know you"
+phrases["turnAround"] = "I am turning"
 
 #set of initial delays
 delay = {"right": 3}
@@ -67,6 +70,7 @@ delay["follow"] = 3
 delay["stopFollow"] = 3.3
 delay["lost"] = 2.5
 delay["unrecognized"] = 4
+delay["turnAround"] = 3
 
 #set of initial names
 names = ["Daniel", "Chris", "Cassie"]
