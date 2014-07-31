@@ -5,7 +5,7 @@ from threading  import Thread
 from Queue import Queue, Empty
 refreshRate = 5 #Hz
 warn = False #set to True if you want warning messages to display
-def enqueue_output(out, queue):
+def enqueue_output(out, queue): #puts output stream data onto a queue
     for line in iter(out.readline, b''):
         queue.put(line)
     out.close()
@@ -34,7 +34,7 @@ class process: #create one of these to do IPC
                 sys.stderr.write('no output yet\n')
         else:
             self.onRead()
-    def write(self,data):
+    def write(self,data): #data should always end with a new line ("\n")
         if self.usestd==False:
             self.p.stdin.write(data)
             self.p.stdin.flush()
