@@ -276,7 +276,7 @@ def turnAround():
     readyTT = False
     if not r.isbumped():
         km.write("sleep\n")
-        sp.write("turnAround")
+        sp.write("turnAround\n")
         r.rotate(np.pi/1.1) #rotate 180 degrees
     r.setvel(0,0)
     km.write("wake\n")
