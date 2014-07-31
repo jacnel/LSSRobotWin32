@@ -29,7 +29,7 @@ gestGivenPID = -1 #personID of the user who provided a gesture
 lib.loop(track)
 
 readyCount = 0 #so face identification is run every NUM_LOOPS times
-MAX_GUESSES = 25 #maximum number of guesses the face identifier is allowed before a person is considered unrecognized
+MAX_GUESSES = 30 #maximum number of guesses the face identifier is allowed before a person is considered unrecognized
 
 def detect_motion():
     global rightWave
@@ -99,7 +99,7 @@ def detect_motion():
                     if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonL_ShZ(track,user))<150:
                         follstage[user]="none"
                         lock.acquire()
-                        userOfInt = user
+                        userOfInt = lib.getUserID(track,user)
                         follow = True
                         sys.stderr.write("got follow from user "+str(user)+"\n")
                         lock.release()
@@ -180,6 +180,7 @@ def facialActions():
                     if curSkeletonPersonIDs[key] >= 0 and oldSkeletonPersonIDs[key] < 0:
                         #person is now recognized
                         p.write("face recognized " + str(key) + " " + str(curSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
+                        personIDAttempts[key] = MAX_GUESSES + 1
                         sys.stderr.write("recognized skeleton: " + str(key) + " as person: " + str(curSkeletonPersonIDs[key]) + "\n")
                     elif curSkeletonPersonIDs[key] < 0 and oldSkeletonPersonIDs[key] >= 0:
                         #recognized person has left the frame
@@ -196,7 +197,7 @@ def facialActions():
                     personIDAttempts[key] = personIDAttempts[key] + 1  #attempt failed to identify user
                 elif personIDAttempts[key] == MAX_GUESSES:
                     #person was failed to be recognized
-                    #p.write("face unrecognized " + str(time.time()) + "\n")
+                    p.write("face unrecognized " + str(time.time()) + "\n")
                     sys.stderr.write(" user is unrecognizable\n")
                     personIDAttempts[key] = personIDAttempts[key] + 1
                 elif personIDAttempts[key] > MAX_GUESSES:
@@ -208,6 +209,7 @@ def facialActions():
                 if curSkeletonPersonIDs[key] >= 0:
                     #if face is recognized in one try (user comes on and is immediately recognized
                     p.write("face recognized " + str(key) + " " + str(curSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
+                    personIDAttempts[key] = MAX_GUESSES + 1
                     sys.stderr.write("recognized skeleton: " + str(key) + " as person: " + str(curSkeletonPersonIDs[key]) + "\n")
                 else:
                     sys.stderr.write("first guess fail " + str(key) + "\n")
@@ -216,7 +218,7 @@ def facialActions():
         oldSkeletonPersonIDs = dict(curSkeletonPersonIDs)
         lock.release()
        
-        time.sleep(.1)
+        time.sleep(.3)
                 
                                 
 def handleLine():

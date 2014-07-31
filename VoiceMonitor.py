@@ -44,7 +44,7 @@ while re.Listening == True: #while listening
        lilytime = time.time()
    elif Lily == True:
        if not index == -1: #-1 means queue is empty
-           if timeout < lilytime + 3:
+           if timeout < lilytime + 5:
                if index == 6: #index 6 is a quit command
                     re.stopListening(engine)
                vm.write(str(commands[index])+'\n')

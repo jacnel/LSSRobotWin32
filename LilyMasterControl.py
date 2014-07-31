@@ -53,7 +53,7 @@ def follow():
         mess = "follow "
         if len(list) > 4: #"follow xCoord yCoord skeletonID timeStamp"
             if int(list[3]) in skeletonPersonIDs.keys() and skeletonPersonIDs[int(list[3])] >= 0:    #handles if a name was given also, unrecognized means don't follow
-                mess = mess + str(skeletonPersonIDs[list[3]])
+                mess = mess + str(skeletonPersonIDs[int(list[3])])
             else:
                 readyTT = True #exits because should not follow
                 return
@@ -157,7 +157,10 @@ def GestureResponse():
     else:             #line given was "command timeStamp"
         timeStamp = float(parts[1])
         pID = -3 #not a number that might be passed from KinectMonitor (those are either -2 or -1)
-    
+
+    if gest == "quit":
+        Exit(pID)    
+
     #exit if message was received during the last movement or is not in a waiting state
     #otherwise execute the correct command response
     if timeStamp < lastMoveTime or not state == "waiting": #gesture received during another gesture execution
@@ -166,8 +169,6 @@ def GestureResponse():
         waveRight(pID)
     if gest == "leftWave":
         waveLeft(pID)
-    if gest == "quit":
-        Exit(pID)
     if gest == "turnAround":
         turnAround()
 
