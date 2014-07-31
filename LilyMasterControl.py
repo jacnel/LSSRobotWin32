@@ -160,11 +160,8 @@ def GestureResponse():
     
     #exit if message was received during the last movement or is not in a waiting state
     #otherwise execute the correct command response
-    if not gest == 'Lily':
-        if timeStamp < lastMoveTime or not state == "waiting": #gesture received during another gesture execution
-            return
-    if gest == "Lily": 
-        print "Yes?"
+    if timeStamp < lastMoveTime or not state == "waiting": #gesture received during another gesture execution
+        return
     if gest == "rightWave":
         waveRight(pID)
     if gest == "leftWave":
