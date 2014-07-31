@@ -13,7 +13,7 @@ recoged = ['Lily', 'Move right', 'Move left', 'Follow me', 'Stop', 'Goodbye'] #r
 vm = IPC.process(True, 'VoiceMonitor.py')
 
 started = False #changes once it gets start command from master controller
-Lily = False
+Lily = False #user must say Lily before giving a command
 
 re = sra.Program()
 engine = re.buildRecognizer() #create Speech Recognition Engine
@@ -32,8 +32,6 @@ IPC.InitSync()
 while not started:
     vm.tryReadLine()
     IPC.Sync()
-
-#re.runRecognizer(engine) #start listening
 
 while re.Listening == True: #while listening
    index = re.grabCommand()  #access recognized command
