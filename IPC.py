@@ -10,17 +10,17 @@ def enqueue_output(out, queue):
         queue.put(line)
     out.close()
 
-class process:
+class process: #create one of these to do IPC
     
-    def __init__(self,usestd,var):
+    def __init__(self,usestd,var): #set usestd to true if you want to communicate through std in and out (this should be a child process in this case)
         self.usestd=usestd
         if usestd==False:
-            self.p = subprocess.Popen(['python',var],-1,None,subprocess.PIPE,subprocess.PIPE)
+            self.p = subprocess.Popen(['python',var],-1,None,subprocess.PIPE,subprocess.PIPE) #spawns child process
         self.q = Queue()
         if usestd==True:
-            self.t = Thread(target=enqueue_output, args=(sys.stdin, self.q))
+            self.t = Thread(target=enqueue_output, args=(sys.stdin, self.q))#start looking for input and be ready to send output
         else:
-            self.t = Thread(target=enqueue_output, args=(self.p.stdout, self.q))
+            self.t = Thread(target=enqueue_output, args=(self.p.stdout, self.q))#start looking for input and be ready to send output
         self.t.daemon = True # thread dies with the program
         self.t.start()
         self.line = ""
