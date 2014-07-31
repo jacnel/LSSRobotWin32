@@ -32,6 +32,7 @@ readyTT=False
 lastMoveTime = time.time()
 
 state = "waiting"
+voiceFollow = False #true if the follow command was received by voice and should follow regardless of recognition
 
 #holds dictionary of recognized skeletonIDs and their personID
 skeletonPersonIDs = {-1:-1}
@@ -42,18 +43,22 @@ def follow():
     global readyTT
     global lastMoveTime
     global qFollow
+    global voiceFollow
     line = qFollow.get()
     list = string.split(line)
     if not state == "following": #LILI just started following user
         print "Following."
         readyTT = False
         mess = "follow "
-        try:
-            if len(list) > 3:
-                int(list[3])    #handles if a name was given also
-                mess = mess + list[3]
-        except ValueError:
-            mess = mess #need something to go in the except block
+        if len(list) > 4: #"follow xCoord yCoord skeletonID timeStamp"
+            if int(list[3]) in skeletonPersonIDs.keys() and skeletonPersonIDs[int(list[3])] >= 0:    #handles if a name was given also, unrecognized means don't follow
+                mess = mess + str(skeletonPersonIDs[list[3]])
+            else:
+                readyTT = True #exits because should not follow
+                return
+        elif not voiceFollow: #"follow xCoord yCoord timeStamp" and follow was not started by voice command
+            readyTT = True #exits because should not follow
+            return
         mess = mess + "\n"
         sp.write(mess)
     state = "following"
@@ -72,6 +77,7 @@ def follow():
         mess = mess + "\n"
         sp.write(mess)
         state = "waiting"
+        voiceFollow = False
         lastMoveTime = time.time()
         return
     a = float(list[1]) #x coordinate of user relative to LILI
@@ -117,9 +123,11 @@ def KinectQueue():
 #adds command from VoiceMonitor onto appropriate queue
 def VocalQueue():
     global state
+    global voiceFollow
     line = vm.line.strip()
     #follow information must be writeen to KinectMonitor so that it will start sending information about user location
     if line == "follow":
+        voiceFollow = True
         km.write('follow\n')
     if line == "stop":
         km.write('follow stop\n')

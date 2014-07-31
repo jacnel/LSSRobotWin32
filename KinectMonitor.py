@@ -265,7 +265,10 @@ while True:
         if user>=0: #we found the user
             if lib.isUserTracked(track, user):
                 #sys.stderr.write("is following\n")
-                p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+" " + str(time.time()) + "\n")
+                if userOfInt in curSkeletonPersonIDs.keys() and curSkeletonPersonIDs[userOfInt] >= 0:
+                    p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(userOfInt) + " " + str(time.time()) + "\n")
+                else:
+                    p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(time.time()) + "\n")
             else:#they aren't tracked
                 stopfollow = True
         else:#they're not here
