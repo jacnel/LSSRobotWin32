@@ -60,7 +60,7 @@ def follow():
             readyTT = True #exits because should not follow
             return
         mess = mess + "\n"
-        sp.write(mess)
+        sp.write(mess) #will speak a name if valid user gave gesture, will speak without a name if follow came from voice command
     state = "following"
     
     if list[1] == "stop": #LILI received a stop command or has lost track of the user
@@ -127,7 +127,7 @@ def VocalQueue():
     line = vm.line.strip()
     #follow information must be writeen to KinectMonitor so that it will start sending information about user location
     if line == "follow":
-        voiceFollow = True
+        voiceFollow = True #if follow started by voice command, LILI can follow unknown users. This allows for that functionality
         km.write('follow\n')
     if line == "stop":
         km.write('follow stop\n')
