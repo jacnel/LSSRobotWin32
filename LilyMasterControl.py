@@ -57,14 +57,18 @@ def follow():
             else:
                 readyTT = True #exits because should not follow
                 return
-        elif not voiceFollow: #"follow xCoord yCoord timeStamp" and follow was not started by voice command
+        elif not voiceFollow and len(list) > 3: #"follow xCoord yCoord timeStamp" and follow was not started by voice command
             readyTT = True #exits because should not follow
+            km.write("follow stop\n") #follow gesture came from unrecognized user and KM should stop sending information
             return
-        mess = mess + "\n"
-        sp.write(mess) #will speak a name if valid user gave gesture, will speak without a name if follow came from voice command
-    state = "following"
+        if len(list) > 3:
+            mess = mess + "\n"
+            sp.write(mess) #will speak a name if valid user gave gesture, will speak without a name if follow came from voice command
+            state = "following"
     
     if list[1] == "stop": #LILI received a stop command or has lost track of the user
+        if state == "waiting": #state will be waiting if follow gesture received from unknown user and
+            return             #handles feedback from KinectMonitor after sending a follow stop in this case
         print "Stopping."
         readyTT = False
         r.setvel(0,0) #stop robot motion

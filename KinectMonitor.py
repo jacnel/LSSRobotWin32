@@ -236,6 +236,7 @@ def handleLine():
             sys.stderr.write("no users\n")
     elif p.line == "follow stop\n":
         stopfollow = True
+        follow = False
         sys.stderr.write("got stop follow\n")
     elif p.line == "sleep\n":
         e.clear()  #pauses the other threads until ready for them to start again
