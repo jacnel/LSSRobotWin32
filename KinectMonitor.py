@@ -215,6 +215,7 @@ def facialActions():
                     sys.stderr.write("first guess fail " + str(key) + "\n")
         for key in deleteKeys:
             del curSkeletonPersonIDs[key]  #removes from dictionary any skeletons that have left the field of vision
+            del personIDAttempts[key]   #removes skeleton that has been lost so that the skeletonID can be reused
         oldSkeletonPersonIDs = dict(curSkeletonPersonIDs)
         lock.release()
        
