@@ -23,15 +23,17 @@ class iRobotCreate:
             -optional_port_number should be used when not in simulation mode, should pass the integer port number for Windows
                 otherwise pass string for path to port for Linux/Max
         """
+        #[cjg] and [clg] 
+        #initial values for variables needed for added code
         self.xcoord = np.zeros((6, 11))
         self.ycoord = np.zeros((6, 11))
         self.v = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.omega = np.array([-0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.trajectory() #fill in LUT for travel distances
-        
         self.x = 0.0
         self.y = 0.0
         self.theta = 0.0
+        
         self.simulation = simulation_mode
         if simulation_mode != 1 and simulation_mode !=0 :
             raise InputError('Invalid Simulation Argument: ', simulation_mode)
@@ -257,7 +259,7 @@ class iRobotCreate:
         
         #finds the angle between current and new point
         alpha = math.atan2(dY, dX)
-        #decides to rotate and move or stay in place
+        #decides to rotate and move or stay in place if distance to point is too small
         if not math.fabs(dX) < .01 or not math.fabs(dY) < .01: 
             self.rotate(self.angleSub(self.theta, alpha))
             dist = np.sqrt(dX**2 + dY**2)
@@ -267,6 +269,7 @@ class iRobotCreate:
         
         #final rotation to new point
         self.rotate(self.angleSub(alpha, ntheta))
+        #set current position
         self.x = nx
         self.y = ny
         self.theta = ntheta
@@ -285,14 +288,14 @@ class iRobotCreate:
         for vdex in range(0, 6):
             for odex in range (0, 11):
                 for index in range(1,num_steps+1):
-                    x[index] = x[index-1] + self.v[vdex]*np.cos(theta[index-1])*dt
+                    x[index] = x[index-1] + self.v[vdex]*np.cos(theta[index-1])*dt  #calculate value at each step
                     y[index] = y[index-1] + self.v[vdex]*np.sin(theta[index-1])*dt
                     theta[index] = theta[index-1] + self.omega[odex]*dt
                 if vdex==5 and not odex ==5:
-                    continue
+                    continue #all speed values when velocity = .5 except when omega = 0 are invalid and should be left at 0
                 else:   
-                    self.xcoord[vdex][odex] = x[10]
-                    self.ycoord[vdex][odex] = y[10]
+                    self.xcoord[vdex][odex] = x[10] #set point in table to point reached after 2 seconds
+                    self.ycoord[vdex][odex] = y[10] #set point in table to point reached after 2 seconds
                         
     #Added by CJG
     #trajectory method must be called before use
@@ -306,7 +309,7 @@ class iRobotCreate:
             self.setvel(0,0)
             return;
         
-        index = dist.flatten().argmin()
+        index = dist.flatten().argmin() #finds the index of the minimum value in the flattend distance (cost) array
         
         #find row and column of minimum value based off of flattened index
         rowNum = index/11

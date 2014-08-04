@@ -32,13 +32,13 @@ readyTT=False
 #holds the time of completion of the most recent movement
 lastMoveTime = time.time()
 
-state = "waiting"
-voiceFollow = False #true if the follow command was received by voice and should follow regardless of recognition
+state = "waiting" #keep track of whether or not LILI is following a user
+voiceFollow = False #true if the follow command was received by voice and should follow regardless of recognition of user
 
 #holds dictionary of recognized skeletonIDs and their personID
 skeletonPersonIDs = {-1:-1}
 
-#handles values from the qFollow queue
+#handles values from the qFollow queue, only called if qFollow is not empty
 def follow():
     global state
     global readyTT
@@ -64,7 +64,7 @@ def follow():
         if len(list) > 3:
             mess = mess + "\n"
             sp.write(mess) #will speak a name if valid user gave gesture, will speak without a name if follow came from voice command
-            state = "following"
+            state = "following" #user is now being followed
     
     if list[1] == "stop": #LILI received a stop command or has lost track of the user
         if state == "waiting": #state will be waiting if follow gesture received from unknown user and
@@ -83,12 +83,12 @@ def follow():
         sp.write(mess)
         state = "waiting"
         voiceFollow = False
-        lastMoveTime = time.time()
+        lastMoveTime = time.time() #user no longer being followed
         return
     a = float(list[1]) #x coordinate of user relative to LILI
     b = float(list[2]) #y coordinate of user relative to LILI
 
-    distF = 1.5 #distance behind person
+    distF = 1.5 #distance behind person to follow
     
     #find the point 1.5 meters behind the user on a straight line between the user and the robot
     if not a == 0:
@@ -191,10 +191,11 @@ def faceResponse():
         
     elif parts[1] == "lost":
         #recognized user has left
+        if int(parts[2]) >= 0:
+            readyTT = False
+            sp.write("bye " + parts[3] + "\n") #only speak in known user has left
+        del skeletonPersonIDs[int(parts[2])] #remove all users that have been lost (including unrecognized)
         
-        del skeletonPersonIDs[int(parts[2])] #remove user that has been lost
-        readyTT = False
-        sp.write("bye " + parts[3] + "\n")
         
     elif parts[1] == "unrecognized":
         #user has been marked as unkown and no more attempts will be made to recognize them
