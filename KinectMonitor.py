@@ -171,7 +171,7 @@ def facialActions():
             if not key in tempSkelIDs: #check if it is still on screen
                 curSkeletonPersonIDs[key] = -5 #skeleton is no longer on screen
         
-        deleteKeys = []
+        deleteKeys = [] #holds keys to be deleted
         #check for any changes in the personIDs that correspond to the skeletonIDs
         for key in curSkeletonPersonIDs.keys():
             if key in oldSkeletonPersonIDs.keys(): #check skeletonIDs that were previously on screen
@@ -203,6 +203,9 @@ def facialActions():
                 elif personIDAttempts[key] > MAX_GUESSES:
                     if curSkeletonPersonIDs[key] == -5:
                         deleteKeys.append(key) #skeleton has used max guesses and then left the screen
+                        if oldSkeletonPersonIDs[key] >= 0: #recognized person left
+                            p.write("face lost " + str(key) + " " + str(oldSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
+                            sys.stderr.write("person: " + str(oldSkeletonPersonIDs[key]) + " has left vision as skeleton: " + str(key) + "\n")
                     curSkeletonPersonIDs[key] = oldSkeletonPersonIDs[key]
                 else:
                     sys.stderr.write("equal and not other three\n")
