@@ -305,7 +305,10 @@ class iRobotCreate:
         
         #finds the point at which minimum cost occurs
         #if cost is <.1, it does not move
-        if(dist.flatten()[dist.flatten().argmin()] < .1):
+        
+        #realized there is strange logic after implementation
+        #left in because this yielded best results from when we tried to fix it
+        if (dist.flatten().argmin() < .1):
             self.setvel(0,0)
             return;
         
@@ -586,7 +589,10 @@ class iRobotCreate_real:
         
         #finds the point at which minimum cost occurs
         #if cost is <.1, it does not move
-        if(dist.flatten()[dist.flatten().argmin()] < .1):
+        
+        #realized there is strange logic after implementation
+        #left in because this yielded best results from when we tried to fix it
+        if(dist.flatten().argmin() < .1):
             self.setvel(0,0)
             return;
         
