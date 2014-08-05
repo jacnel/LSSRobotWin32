@@ -305,7 +305,7 @@ class iRobotCreate:
         
         #finds the point at which minimum cost occurs
         #if cost is <.1, it does not move
-        if(dist.flatten().argmin() < .1):
+        if(dist.flatten()[dist.flatten().argmin()] < .1):
             self.setvel(0,0)
             return;
         
