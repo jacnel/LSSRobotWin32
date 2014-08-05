@@ -190,6 +190,7 @@ def facialActions():
                         sys.stderr.write("failed guess for " + str(key) + "\n")
                         personIDAttempts[key] = personIDAttempts[key] + 1
                     else:
+                        curSkeletonPersonIDs[key] = oldSkeletonPersonIDs[key] #keep first identification
                         sys.stderr.write("both greater, but different\n")
                 elif personIDAttempts[key] < MAX_GUESSES:
                     sys.stderr.write("failed same guess " + str(key) + "\n")
@@ -200,6 +201,8 @@ def facialActions():
                     sys.stderr.write(" user is unrecognizable\n")
                     personIDAttempts[key] = personIDAttempts[key] + 1
                 elif personIDAttempts[key] > MAX_GUESSES:
+                    if curSkeletonPersonIDs[key] == -5:
+                        deleteKeys.append(key) #skeleton has used max guesses and then left the screen
                     curSkeletonPersonIDs[key] = oldSkeletonPersonIDs[key]
                 else:
                     sys.stderr.write("equal and not other three\n")
@@ -213,6 +216,7 @@ def facialActions():
                 else:
                     sys.stderr.write("first guess fail " + str(key) + "\n")
         for key in deleteKeys:
+            sys.stderr.write("deleted skeleton " + str(key) + " as person " + str(oldSkeletonPersonIDs[key])+ "\n")
             del curSkeletonPersonIDs[key] #removes from dictionary any skeletons that have left the field of vision
             del personIDAttempts[key] #removes skeleton that has been lost so that the skeletonID can be reused
         oldSkeletonPersonIDs = dict(curSkeletonPersonIDs)
