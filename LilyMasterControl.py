@@ -191,10 +191,10 @@ def faceResponse():
         
     elif parts[1] == "lost":
         #recognized user has left
-        if int(parts[2]) >= 0:
-            readyTT = False
-            sp.write("bye " + parts[3] + "\n") #only speak in known user has left
-        del skeletonPersonIDs[int(parts[2])] #remove all users that have been lost (including unrecognized)
+        
+        del skeletonPersonIDs[int(parts[2])] #remove user that has been lost
+        readyTT = False
+        sp.write("bye " + parts[3] + "\n")
         
         
     elif parts[1] == "unrecognized":

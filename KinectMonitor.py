@@ -152,30 +152,26 @@ def facialActions():
     global personIDAttempts
     
     while True:
-        e.wait()   #pauses thread if main thread flag is cleared
+        e.wait() #pauses thread if main thread flag is cleared
         lock.acquire()
         lib.takeSnapShot(track)
         lib.detectPeople(track)
         lock.release()
         
-        tempSkelIDs = [] #holds skeletonIDs of all users that are currently in the frame
+        tempSkelIDs = []
         
         lock.acquire()
         for user in range(0, lib.getUsersCount(track)):
             curSkeletonPersonIDs[lib.getUserID(track, user)] = lib.getUserPersonID(track, user) #for each user, match skeletonID to personID
             if not lib.getUserID(track, user) in personIDAttempts.keys():
-                personIDAttempts[lib.getUserID(track, user)] = 0 #for new skeletons set the number of recognition attempts to 0
+                personIDAttempts[lib.getUserID(track, user)] = 0
             tempSkelIDs.append(lib.getUserID(track, user))
             
-        for key in curSkeletonPersonIDs:       #for every skeletonID that has been created
-            if not key in tempSkelIDs:     #check if it is still on screen
-                #delete all skeletonIDs that are no longer on screen and send message to master control
-                p.write("face lost " + str(key) + " " + str(curSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
-                del curSkeletonPersonIDs[key]  #removes from dictionary any skeletons that have left the field of vision
-                personIDAttempts.remove(key)   #removes skeleton that has been lost so that the skeletonID can be reused
-                #curSkeletonPersonIDs[key] = -1 #skeleton is no longer on screen
+        for key in curSkeletonPersonIDs: #for every skeletonID that has been created
+            if not key in tempSkelIDs: #check if it is still on screen
+                curSkeletonPersonIDs[key] = -5 #skeleton is no longer on screen
         
-        #deleteKeys = []  #skeletons that need to be deleted
+        deleteKeys = []
         #check for any changes in the personIDs that correspond to the skeletonIDs
         for key in curSkeletonPersonIDs.keys():
             if key in oldSkeletonPersonIDs.keys(): #check skeletonIDs that were previously on screen
@@ -183,43 +179,46 @@ def facialActions():
                     if curSkeletonPersonIDs[key] >= 0 and oldSkeletonPersonIDs[key] < 0:
                         #person is now recognized
                         p.write("face recognized " + str(key) + " " + str(curSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
-                        personIDAttempts[key] = MAX_GUESSES + 1 #prevent continued attempts at recognition if next image is not recognized
+                        personIDAttempts[key] = MAX_GUESSES + 1
                         sys.stderr.write("recognized skeleton: " + str(key) + " as person: " + str(curSkeletonPersonIDs[key]) + "\n")
-                    #elif curSkeletonPersonIDs[key] < 0 and oldSkeletonPersonIDs[key] >= 0:
-                    #    #recognized person has left the frame
-                    #    p.write("face lost " + str(key) + " " + str(oldSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
-                    #    sys.stderr.write("person: " + str(oldSkeletonPersonIDs[key]) + " has left vision as skeleton: " + str(key) + "\n")
-                    #    deleteKeys.append(key)  #key added so it can be appropriately deleted from all lists and dictionaries
-                    elif curSkeletonPersonIDs[key] < 0 and oldSkeletonPersonIDs[key] < 0: 
-                        #for different negative numbers showing up (any negative number is a failure to recognize)
-                        #sys.stderr.write("failed guess for " + str(key) + "\n")
-                        personIDAttempts[key] = personIDAttempts[key] + 1 #failed guess
+                    elif curSkeletonPersonIDs[key] < 0 and oldSkeletonPersonIDs[key] >= 0:
+                        #recognized person has left the frame
+                        p.write("face lost " + str(key) + " " + str(oldSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
+                        sys.stderr.write("person: " + str(oldSkeletonPersonIDs[key]) + " has left vision as skeleton: " + str(key) + "\n")
+                        deleteKeys.append(key)
+                    elif curSkeletonPersonIDs[key] < 0 and oldSkeletonPersonIDs[key] < 0: #for different negative numbers showing up (any negative number is a failure to recognize
+                        sys.stderr.write("failed guess for " + str(key) + "\n")
+                        personIDAttempts[key] = personIDAttempts[key] + 1
+                    else:
+                        sys.stderr.write("both greater, but different\n")
                 elif personIDAttempts[key] < MAX_GUESSES:
-                    #sys.stderr.write("failed same guess " + str(key) + "\n")
-                    personIDAttempts[key] = personIDAttempts[key] + 1  #attempt failed to identify user
+                    sys.stderr.write("failed same guess " + str(key) + "\n")
+                    personIDAttempts[key] = personIDAttempts[key] + 1 #attempt failed to identify user
                 elif personIDAttempts[key] == MAX_GUESSES:
                     #person was failed to be recognized
                     p.write("face unrecognized " + str(time.time()) + "\n")
                     sys.stderr.write(" user is unrecognizable\n")
                     personIDAttempts[key] = personIDAttempts[key] + 1
-                elif personIDAttempts[key] > MAX_GUESSES: #already used maximum number of guesses, just reset curSkeletonPersonIDs
+                elif personIDAttempts[key] > MAX_GUESSES:
                     curSkeletonPersonIDs[key] = oldSkeletonPersonIDs[key]
-            else: #new skeleton came on frame
+                else:
+                    sys.stderr.write("equal and not other three\n")
+            else:
                 personIDAttempts[key] = personIDAttempts[key] + 1
                 if curSkeletonPersonIDs[key] >= 0:
                     #if face is recognized in one try (user comes on and is immediately recognized
                     p.write("face recognized " + str(key) + " " + str(curSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
-                    personIDAttempts[key] = MAX_GUESSES + 1 #prevent further recognition attempts
+                    personIDAttempts[key] = MAX_GUESSES + 1
                     sys.stderr.write("recognized skeleton: " + str(key) + " as person: " + str(curSkeletonPersonIDs[key]) + "\n")
                 else:
                     sys.stderr.write("first guess fail " + str(key) + "\n")
-        #for key in deleteKeys:
-        #    del curSkeletonPersonIDs[key]  #removes from dictionary any skeletons that have left the field of vision
-        #    personIDAttempts.remove(key)   #removes skeleton that has been lost so that the skeletonID can be reused
-        oldSkeletonPersonIDs = dict(curSkeletonPersonIDs) #set the old version to the current one
+        for key in deleteKeys:
+            del curSkeletonPersonIDs[key] #removes from dictionary any skeletons that have left the field of vision
+            del personIDAttempts[key] #removes skeleton that has been lost so that the skeletonID can be reused
+        oldSkeletonPersonIDs = dict(curSkeletonPersonIDs)
         lock.release()
        
-        time.sleep(.3) #allow for changes in snapshot to occur
+        time.sleep(.3)
                 
                                 
 def handleLine():
