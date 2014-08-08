@@ -14,6 +14,8 @@ The CSLU Toolkit as described in TalkingAvatarReadme.
 		-change emotions as needed (ie .1 happy) -> keep neutral at max to avoid highly distorted faces
 		-click save when satisfied
 	-click into the TTS window where text would be entered in to make it possible for the code to simulate keystrokes into there
+	NOTE: BaldiSync needs a microphone and speaker attached to run.  If it has an error opening and the desired devices are set to default,
+		disable any other undesired devices, then try to open the program again.
 
 Microsoft Speech SDK 11:
 	first, run dotNetFx40_Full_Setup
