@@ -70,7 +70,7 @@ def detect_motion():
                         gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
                         sys.stderr.write("got left wave from user "+str(user) +"\n")
                         lock.release()
-            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)<0:
+            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)<0 or lib.getUserSkeletonL_ElbowConf(track,user)<=0.5:
                 lstage[user] = "none"#we hit a point that is un acceptable for this gesture, cancel it
                 
             if rstage[user]=="none":#nothing has happened yet, check if the arm is in a position of interest
@@ -86,7 +86,7 @@ def detect_motion():
                         gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
                         sys.stderr.write("got right wave from user "+str(user)+"\n")
                         lock.release()
-            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)<0:
+            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)<0 or lib.getUserSkeletonR_ElbowConf(track,user)<=0.5:
                 rstage[user] = "none"#we hit a point that is un acceptable for this gesture, cancel it
                 
             if follstage[user]=="none":#nothing has happened yet, check if the arm is in a position of interest
@@ -102,11 +102,11 @@ def detect_motion():
                         follow = True
                         sys.stderr.write("got follow from user "+str(user)+"\n")
                         lock.release()
-            if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))>100:
+            if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))>100 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
                 follstage[user]="none" #invalid for the follow gesture
-            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
+            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0 or lib.getUserSkeletonL_HandConf(track,user)<=0.5:
                 follstage[user]="none"#invalid for the follow gesture
-            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
+            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
                 follstage[user]="none"#invalid for the follow gesture
 
             if stopfollstage[user]=="none":#nothing has happened yet, check if the arm is in a position of interest
@@ -122,11 +122,11 @@ def detect_motion():
                         stopfollow = True
                         sys.stderr.write("got stop follow from user "+str(user)+"\n")
                         lock.release()
-            if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))>100:
+            if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))>100 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
                 stopfollstage[user]="none"#invalid for the stop follow gesture
-            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
+            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0 or lib.getUserSkeletonL_HandConf(track,user)<=0.5:
                 stopfollstage[user]="none"#invalid for the stop follow gesture
-            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0:
+            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonTorsoY(track,user)<0 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
                 stopfollstage[user]="none"#invalid for the stop follow gesture
                     
             if quitstage[user]=="none":#nothing has happened yet, check if the arm is in a position of interest
@@ -140,9 +140,9 @@ def detect_motion():
                     gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
                     sys.stderr.write("goodbye "+str(user)+"\n")
                     lock.release()
-            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonNeckY(track,user)<0:
+            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonNeckY(track,user)<0 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
                 quitstage[user]="none"#invalid for the quit gesture
-            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonHeadY(track,user)>0:
+            if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonHeadY(track,user)>0 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
                 quitstage[user]="none"#invalid for the quit gesture
         
 
