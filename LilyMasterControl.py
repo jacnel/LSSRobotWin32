@@ -199,8 +199,8 @@ def faceResponse():
         
     elif parts[1] == "unrecognized":
         #user has been marked as unkown and no more attempts will be made to recognize them
-        readyTT = False
-        sp.write("unrecognized\n")
+        #readyTT = False
+        #sp.write("unrecognized\n")
     else:
         sys.stderr.write("invalid input " + parts[1] + "\n")
         
