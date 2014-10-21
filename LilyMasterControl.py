@@ -201,6 +201,7 @@ def faceResponse():
         #user has been marked as unkown and no more attempts will be made to recognize them
         #readyTT = False
         #sp.write("unrecognized\n")
+		z=1
     else:
         sys.stderr.write("invalid input " + parts[1] + "\n")
         
@@ -350,3 +351,5 @@ while quit == False: # The user has not asked to quit.
     if not qFace.empty():
         faceResponse()
     IPC.Sync()
+print "deleting r"
+r.delete()
