@@ -194,7 +194,8 @@ def faceResponse():
         
         del skeletonPersonIDs[int(parts[2])] #remove user that has been lost
         readyTT = False
-        sp.write("bye " + parts[3] + "\n")
+        if parts[3]>=0:
+            sp.write("bye " + parts[3] + "\n")
         
         
     elif parts[1] == "unrecognized":
