@@ -88,7 +88,7 @@ def follow():
     a = float(list[1]) #x coordinate of user relative to LILI
     b = float(list[2]) #y coordinate of user relative to LILI
 
-    distF = 1.5 #distance behind person to follow
+    distF = 2 #distance behind person to follow
     
     #find the point 1.5 meters behind the user on a straight line between the user and the robot
     if not a == 0:

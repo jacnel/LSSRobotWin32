@@ -306,19 +306,20 @@ class iRobotCreate:
         #finds the point at which minimum cost occurs
         #if cost is <.1, it does not move
         
-        #Fixed logic, but untested
-        if (dist.flatten()[dist.flatten().argmin()[0]] < .1):
+        #realized there is strange logic after implementation
+        #left in because this yielded best results from when we tried to fix it
+        if(dist.flatten().argmin() < .1):
             self.setvel(0,0)
             return;
         
-        index = dist.flatten().argmin()[0] #finds the index of the minimum value in the flattend distance (cost) array
+        index = dist.flatten().argmin()
         
         #find row and column of minimum value based off of flattened index
         rowNum = index/11
         colNum = index % 11
         
         #move
-        self.setvel(self.v[rowNum],self.omega[colNum])
+        self.setvel(self.v[rowNum],self.omega[colNum])                    
            
 
 
