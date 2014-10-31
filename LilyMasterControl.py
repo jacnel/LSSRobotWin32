@@ -189,13 +189,13 @@ def faceResponse():
         skeletonPersonIDs[int(parts[2])] = int(parts[3]) #add new user to dictionary
         readyTT = False
         sys.stderr.write("person is " + parts[3] + "\n")
-        if len(indivTime)<parts[3]:
-            for x in range(len(indivTime),parts[3]+1):
+        if len(indivTime)<int(parts[3]):
+            for x in range(len(indivTime),int(parts[3])+1):
                 parts.append(300.0)
             sp.write("hello " + parts[3] + "\n")
-        if indivTime[parts[3]]<0:
+        if indivTime[int(parts[3])]<0:
             sp.write("hello " + parts[3] + "\n")
-        indivTime[parts[3]] = 300.0
+        indivTime[int(parts[3])] = 300.0
         
     elif parts[1] == "lost":
         #recognized user has left
@@ -348,7 +348,7 @@ while quit == False: # The user has not asked to quit.
     km.tryReadLine()  # receive input from the kinect monitor
     sp.tryReadLine()  # receive input from the TTS
     
-    for X in range(0,len(indivTime)):
+    for x in range(0,len(indivTime)):
     	indivTime[x] = indivTime[x]-0.2
     if not qFollow.empty(): #if there is a command in the qFollow queue
         follow()

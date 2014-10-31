@@ -39,13 +39,13 @@ class process: #create one of these to do IPC
             try:
                 self.p.stdin.write(data)
                 self.p.stdin.flush()
-            except ValueError:
+            except Exception:
                 sys.stderr.write('error writing to process\n')
         else:
             try:
                 sys.stdout.write(data)
                 sys.stdout.flush()
-            except ValueError:
+            except Exception:
                 sys.stderr.write('error writing to process\n')
 
 #sets up initial time to sync from
