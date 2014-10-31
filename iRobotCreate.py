@@ -33,7 +33,8 @@ class iRobotCreate:
         self.x = 0.0
         self.y = 0.0
         self.theta = 0.0
-        
+	self.vel = 0.0
+	self.w = 0.0
         self.simulation = simulation_mode
         if simulation_mode != 1 and simulation_mode !=0 :
             raise InputError('Invalid Simulation Argument: ', simulation_mode)
@@ -299,7 +300,8 @@ class iRobotCreate:
                         
     #Added by CJG
     #trajectory method must be called before use
-    def goToGoal(self, xGoal, yGoal):    
+    def goToGoal(self, xGoal, yGoal):
+    	
         #should be a 6 x 11 matrix of distances between trajectory end points and goal points
         dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
         
@@ -317,9 +319,12 @@ class iRobotCreate:
         #find row and column of minimum value based off of flattened index
         rowNum = index/11
         colNum = index % 11
-        
+        mult = 1
+        if abs(self.vel-self.v[rowNum])>0.1:
+            mult = (self.vel+0.1)/self.v[rowNum]
+        self.vel = mult*self.v[rowNum]
         #move
-        self.setvel(self.v[rowNum],self.omega[colNum])                    
+        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])                    
            
 
 
@@ -601,9 +606,12 @@ class iRobotCreate_real:
         #find row and column of minimum value based off of flattened index
         rowNum = index/11
         colNum = index % 11
-        
+        mult = 1
+        if abs(self.vel-self.v[rowNum])>0.1:
+            mult = (self.vel+0.1)/self.v[rowNum]
+        self.vel = mult*self.v[rowNum]
         #move
-        self.setvel(self.v[rowNum],self.omega[colNum])                    
+        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])                        
     
 class Error(Exception):
     """Base class for exceptions in this module."""
