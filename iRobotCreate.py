@@ -311,7 +311,12 @@ class iRobotCreate:
         #realized there is strange logic after implementation
         #left in because this yielded best results from when we tried to fix it
         if(dist.flatten().argmin() < .1):
-            self.setvel(0,0)
+            self.vel=self.vel-0.1
+            self.w = self.w*(self.vel/(self.vel-0.1))
+            if abs(self.vel)<0.11:
+                self.setvel(0,0)
+            else:
+                self.setvel(self.vel,self.w)
             return;
         
         index = dist.flatten().argmin()
