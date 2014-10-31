@@ -194,8 +194,8 @@ def faceResponse():
         
         del skeletonPersonIDs[int(parts[2])] #remove user that has been lost
         readyTT = False
-        if parts[3]>=0:
-            sp.write("bye " + parts[3] + "\n")
+        # if parts[3]>=0:
+            # sp.write("bye " + parts[3] + "\n")
         
         
     elif parts[1] == "unrecognized":
@@ -271,8 +271,9 @@ def Exit(personID):
         readyTT = True
         return #gesture came from KinectMonitor and user is unrecognized should not execute command
     quit = True
-    time.sleep(5) #to allow all subprocesses to close
     r.delete()  
+    time.sleep(5) #to allow all subprocesses to close
+    
 
 #turns LILI 180 degrees to face the other direction
 def turnAround():

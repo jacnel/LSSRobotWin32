@@ -36,16 +36,16 @@ class process: #create one of these to do IPC
             self.onRead()
     def write(self,data): #data should always end with a new line ("\n")
         if self.usestd==False:
-		    try:
+            try:
                 self.p.stdin.write(data)
                 self.p.stdin.flush()
-            except Exception:
+            except ValueError:
                 sys.stderr.write('error writing to process\n')
         else:
             try:
                 sys.stdout.write(data)
                 sys.stdout.flush()
-            except Exception:
+            except ValueError:
                 sys.stderr.write('error writing to process\n')
 
 #sets up initial time to sync from
