@@ -25,8 +25,8 @@ class iRobotCreate:
         """
         #[cjg] and [clg] 
         #initial values for variables needed for added code
-        self.xcoord = np.zeros((6, 11))
-        self.ycoord = np.zeros((6, 11))
+        self.xcoord = np.zeros((6, 11, 11))
+        self.ycoord = np.zeros((6, 11, 11))
         self.v = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.omega = np.array([-0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.trajectory() #fill in LUT for travel distances
@@ -277,7 +277,7 @@ class iRobotCreate:
 
     #Added by CLG
     def trajectory(self):     
-        #create table of all end points from current point
+        #create 3D table of all end and path points from current point
         x = np.zeros(11)
         y = np.zeros(11)
         theta = np.zeros(11) 
@@ -292,18 +292,23 @@ class iRobotCreate:
                     x[index] = x[index-1] + self.v[vdex]*np.cos(theta[index-1])*dt  #calculate value at each step
                     y[index] = y[index-1] + self.v[vdex]*np.sin(theta[index-1])*dt
                     theta[index] = theta[index-1] + self.omega[odex]*dt
-                if vdex==5 and not odex ==5:
-                    continue #all speed values when velocity = .5 except when omega = 0 are invalid and should be left at 0
-                else:   
-                    self.xcoord[vdex][odex] = x[10] #set point in table to point reached after 2 seconds
-                    self.ycoord[vdex][odex] = y[10] #set point in table to point reached after 2 seconds
+                    if vdex==5 and not odex ==5:
+                        continue #all speed values when velocity = .5 except when omega = 0 are invalid and should be left at 0
+                    else:   
+                        self.xcoord[vdex][odex][index] = x[index] #set point in table to point reached after 0.2*index seconds
+                        self.ycoord[vdex][odex][index] = y[index] #set point in table to point reached after 0.2*index seconds
                         
     #Added by CJG
     #trajectory method must be called before use
-    def goToGoal(self, xGoal, yGoal):
+    def goToGoal(self, xGoal, yGoal, obst):
     	
-        #should be a 6 x 11 matrix of distances between trajectory end points and goal points
+        #should be a 6 x 11 x 11 matrix of distances between trajectory path points and the goal point
         dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
+        n = len(obst[0])
+        obst_dist = np.zeros((6,11,11,n));
+        for i in range(0,11):
+            obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
+        dist = dist[:,:,10]+(2000*np.sum(np.sum(obst_dist<20,3),2))
         
         #finds the point at which minimum cost occurs
         #if cost is <.1, it does not move
@@ -567,10 +572,11 @@ class iRobotCreate_real:
         self.x = nx
         self.y = ny
         self.theta = ntheta
+        
 
     #Added by CLG
     def trajectory(self):     
-        #create table of all end points from current point
+        #create 3D table of all end and path points from current point
         x = np.zeros(11)
         y = np.zeros(11)
         theta = np.zeros(11) 
@@ -582,20 +588,26 @@ class iRobotCreate_real:
         for vdex in range(0, 6):
             for odex in range (0, 11):
                 for index in range(1,num_steps+1):
-                    x[index] = x[index-1] + self.v[vdex]*np.cos(theta[index-1])*dt
+                    x[index] = x[index-1] + self.v[vdex]*np.cos(theta[index-1])*dt  #calculate value at each step
                     y[index] = y[index-1] + self.v[vdex]*np.sin(theta[index-1])*dt
                     theta[index] = theta[index-1] + self.omega[odex]*dt
-                if vdex==5 and not odex ==5:
-                    continue
-                else:   
-                    self.xcoord[vdex][odex] = x[10]
-                    self.ycoord[vdex][odex] = y[10]
+                    if vdex==5 and not odex ==5:
+                        continue #all speed values when velocity = .5 except when omega = 0 are invalid and should be left at 0
+                    else:   
+                        self.xcoord[vdex][odex][index] = x[index] #set point in table to point reached after 0.2*index seconds
+                        self.ycoord[vdex][odex][index] = y[index] #set point in table to point reached after 0.2*index seconds
                         
     #Added by CJG
     #trajectory method must be called before use
-    def goToGoal(self, xGoal, yGoal):    
-        #should be a 6 x 11 matrix of distances between trajectory end points and goal points
+    def goToGoal(self, xGoal, yGoal, obst):
+    	
+        #should be a 6 x 11 x 11 matrix of distances between trajectory path points and the goal point
         dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
+        n = len(obst[0])
+        obst_dist = np.zeros((6,11,11,n));
+        for i in range(0,11):
+            obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
+        dist = dist[:,:,10]+(2000*np.sum(np.sum(obst_dist<20,3),2))
         
         #finds the point at which minimum cost occurs
         #if cost is <.1, it does not move
@@ -621,8 +633,10 @@ class iRobotCreate_real:
             mult = (self.vel+0.1)/self.v[rowNum]
         self.vel = mult*self.v[rowNum]
         #move
-        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])                        
-    
+        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])            
+
+
+        
 class Error(Exception):
     """Base class for exceptions in this module."""
     pass
