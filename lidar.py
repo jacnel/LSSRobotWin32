@@ -1,7 +1,7 @@
 
 import ctypes
-lib=ctypes.CDLL('pywrap')
+lidar=ctypes.CDLL('lidar')
 
-lib.lidarScan.restype = ctypes.c_long
+lidar.lidarScan.restype = ctypes.c_long
 
 

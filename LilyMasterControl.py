@@ -8,7 +8,19 @@ import Queue
 import string
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from lidar import *
+
+plt.ion()
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+line1, = ax.plot([], [], 'r.') # Returns a tuple of line objects, thus the comma
+
+ax.set_ylim([-2,2])
+ax.set_xlim([-2,2])
+
 
 indivTime = [300.0]
 
@@ -48,6 +60,8 @@ def follow():
     global lastMoveTime
     global qFollow
     global voiceFollow
+    global line1
+    global fig
     line = qFollow.get()
     list = string.split(line)
     if not state == "following": #LILI just started following user
@@ -103,13 +117,15 @@ def follow():
     
     #stop moving if bump sensor is being pressed, does not stop following
     if not r.isbumped():
-        n = lib.lidarScan(1,0,0)
+        n = lidar.lidarScan(1,0,0)
         lidar_x = []
         lidar_y = []
         for i in range(0,n):
-            if lib.lidarScan(0,i,0)>=0 and lib.lidarScan(0,i,0)<=2000
-                lidar_x.append(cos((240)*(i/n)-120)*lib.lidarScan(0,i,0))
-                lidar_y.append(sin((240)*(i/n)-120)*lib.lidarScan(0,i,0))
+            if lidar.lidarScan(0,i,0)>=100 and lidar.lidarScan(0,i,0)<=2000:
+                lidar_x.append(np.cos(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0+.13)
+                lidar_y.append(-np.sin(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0)
+        line1.set_data(lidar_x,lidar_y)
+        fig.canvas.draw()
         r.goToGoal(c,d,[lidar_x,lidar_y])
     else:
         r.setvel(0, 0)

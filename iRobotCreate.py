@@ -306,7 +306,7 @@ class iRobotCreate:
         dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
         n = len(obst[0])
         obst_dist = np.zeros((6,11,11,n));
-        for i in range(0,11):
+        for i in range(0,n):
             obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
         dist = dist[:,:,10]+(2000*np.sum(np.sum(obst_dist<20,3),2))
         
@@ -316,13 +316,14 @@ class iRobotCreate:
         #realized there is strange logic after implementation
         #left in because this yielded best results from when we tried to fix it
         if(dist.flatten().argmin() < .1):
-            self.vel=self.vel-0.1
-            self.w = self.w*(self.vel/(self.vel-0.1))
-            if abs(self.vel)<0.11:
-                self.setvel(0,0)
-            else:
-                self.setvel(self.vel,self.w)
-            return;
+            # self.vel=self.vel-0.1
+            # self.w = self.w*(self.vel/(self.vel-0.1))
+            # if abs(self.vel)<0.11:
+                # self.setvel(0,0)
+            # else:
+                # self.setvel(self.vel,self.w)
+            # return;
+            self.setvel(0,0)
         
         index = dist.flatten().argmin()
         
@@ -334,7 +335,7 @@ class iRobotCreate:
             mult = (self.vel+0.1)/self.v[rowNum]
         self.vel = mult*self.v[rowNum]
         #move
-        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])                    
+        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])                  
            
 
 
@@ -605,7 +606,7 @@ class iRobotCreate_real:
         dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
         n = len(obst[0])
         obst_dist = np.zeros((6,11,11,n));
-        for i in range(0,11):
+        for i in range(0,n):
             obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
         dist = dist[:,:,10]+(2000*np.sum(np.sum(obst_dist<20,3),2))
         
@@ -615,13 +616,14 @@ class iRobotCreate_real:
         #realized there is strange logic after implementation
         #left in because this yielded best results from when we tried to fix it
         if(dist.flatten().argmin() < .1):
-            self.vel=self.vel-0.1
-            self.w = self.w*(self.vel/(self.vel-0.1))
-            if abs(self.vel)<0.11:
-                self.setvel(0,0)
-            else:
-                self.setvel(self.vel,self.w)
-            return;
+            # self.vel=self.vel-0.1
+            # self.w = self.w*(self.vel/(self.vel-0.1))
+            # if abs(self.vel)<0.11:
+                # self.setvel(0,0)
+            # else:
+                # self.setvel(self.vel,self.w)
+            # return;
+            self.setvel(0,0)
         
         index = dist.flatten().argmin()
         
@@ -633,7 +635,7 @@ class iRobotCreate_real:
             mult = (self.vel+0.1)/self.v[rowNum]
         self.vel = mult*self.v[rowNum]
         #move
-        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])            
+        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])             
 
 
         
