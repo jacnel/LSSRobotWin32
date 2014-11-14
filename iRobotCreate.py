@@ -33,8 +33,8 @@ class iRobotCreate:
         self.x = 0.0
         self.y = 0.0
         self.theta = 0.0
-	self.vel = 0.0
-	self.w = 0.0
+        self.vel = 0.0
+        self.w = 0.0
         self.simulation = simulation_mode
         if simulation_mode != 1 and simulation_mode !=0 :
             raise InputError('Invalid Simulation Argument: ', simulation_mode)
@@ -297,33 +297,37 @@ class iRobotCreate:
                     else:   
                         self.xcoord[vdex][odex][index] = x[index] #set point in table to point reached after 0.2*index seconds
                         self.ycoord[vdex][odex][index] = y[index] #set point in table to point reached after 0.2*index seconds
-                        
+        print self.xcoord[:,:,10]
+        print self.ycoord[:,:,10]          
     #Added by CJG
     #trajectory method must be called before use
     def goToGoal(self, xGoal, yGoal, obst):
     	
         #should be a 6 x 11 x 11 matrix of distances between trajectory path points and the goal point
         dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
-        n = len(obst[0])
-        obst_dist = np.zeros((6,11,11,n));
-        for i in range(0,n):
-            obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
-        dist = dist[:,:,10]+(2000*np.sum(np.sum(obst_dist<20,3),2))
+        # n = len(obst[0])
+        # obst_dist = np.zeros((6,11,11,n));
+        # for i in range(0,n):
+            # obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
+        #print obst_dist
+        #quit()
+        # print obst
+        # quit()
+        dist = dist[:,:,10]#+(2000*np.sum(np.sum(obst_dist<.20,3),2))
         
         #finds the point at which minimum cost occurs
         #if cost is <.1, it does not move
         
         #realized there is strange logic after implementation
         #left in because this yielded best results from when we tried to fix it
-        if(dist.flatten().argmin() < .1):
-            # self.vel=self.vel-0.1
-            # self.w = self.w*(self.vel/(self.vel-0.1))
-            # if abs(self.vel)<0.11:
-                # self.setvel(0,0)
-            # else:
-                # self.setvel(self.vel,self.w)
-            # return;
-            self.setvel(0,0)
+        if(((xGoal)**2 + (yGoal)**2)**.5 < .2):
+            
+            if abs(self.vel-0)>0.05:
+                self.vel = (self.vel+0.1*(0-self.vel)/abs(0-self.vel))
+            else:
+                self.vel=0
+            self.setvel(self.vel,0)
+            return
         
         index = dist.flatten().argmin()
         
@@ -331,11 +335,12 @@ class iRobotCreate:
         rowNum = index/11
         colNum = index % 11
         mult = 1
-        if abs(self.vel-self.v[rowNum])>0.1:
-            mult = (self.vel+0.1)/self.v[rowNum]
+        if abs(self.vel-self.v[rowNum])>0.05 and self.v[rowNum]!=0:
+            mult = (self.vel+0.1*(self.v[rowNum]-self.vel)/abs(self.v[rowNum]-self.vel))/self.v[rowNum]
         self.vel = mult*self.v[rowNum]
         #move
-        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])                  
+        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum]*(self.vel!=0))                
+
            
 
 
@@ -597,6 +602,8 @@ class iRobotCreate_real:
                     else:   
                         self.xcoord[vdex][odex][index] = x[index] #set point in table to point reached after 0.2*index seconds
                         self.ycoord[vdex][odex][index] = y[index] #set point in table to point reached after 0.2*index seconds
+        print self.xcoord
+        print self.ycoord
                         
     #Added by CJG
     #trajectory method must be called before use
@@ -604,26 +611,29 @@ class iRobotCreate_real:
     	
         #should be a 6 x 11 x 11 matrix of distances between trajectory path points and the goal point
         dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
-        n = len(obst[0])
-        obst_dist = np.zeros((6,11,11,n));
-        for i in range(0,n):
-            obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
-        dist = dist[:,:,10]+(2000*np.sum(np.sum(obst_dist<20,3),2))
+        # n = len(obst[0])
+        # obst_dist = np.zeros((6,11,11,n));
+        # for i in range(0,n):
+            # obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
+        #print obst_dist
+        #quit()
+        # print obst
+        # quit()
+        dist = dist[:,:,10]#+(2000*np.sum(np.sum(obst_dist<.20,3),2))
         
         #finds the point at which minimum cost occurs
         #if cost is <.1, it does not move
         
         #realized there is strange logic after implementation
         #left in because this yielded best results from when we tried to fix it
-        if(dist.flatten().argmin() < .1):
-            # self.vel=self.vel-0.1
-            # self.w = self.w*(self.vel/(self.vel-0.1))
-            # if abs(self.vel)<0.11:
-                # self.setvel(0,0)
-            # else:
-                # self.setvel(self.vel,self.w)
-            # return;
-            self.setvel(0,0)
+        if(((xGoal)**2 + (yGoal)**2)**.5 < .2):
+            
+            if abs(self.vel-0)>0.05:
+                self.vel = (self.vel+0.1*(0-self.vel)/abs(0-self.vel))
+            else:
+                self.vel=0
+            self.setvel(self.vel,0)
+            return
         
         index = dist.flatten().argmin()
         
@@ -631,11 +641,12 @@ class iRobotCreate_real:
         rowNum = index/11
         colNum = index % 11
         mult = 1
-        if abs(self.vel-self.v[rowNum])>0.1:
-            mult = (self.vel+0.1)/self.v[rowNum]
+        if abs(self.vel-self.v[rowNum])>0.05 and self.v[rowNum]!=0:
+            mult = (self.vel+0.1*(self.v[rowNum]-self.vel)/abs(self.v[rowNum]-self.vel))/self.v[rowNum]
         self.vel = mult*self.v[rowNum]
         #move
-        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])             
+        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum])                
+                 
 
 
         

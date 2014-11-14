@@ -12,14 +12,14 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from lidar import *
 
-plt.ion()
+#plt.ion()
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-line1, = ax.plot([], [], 'r.') # Returns a tuple of line objects, thus the comma
+#fig = plt.figure()
+#ax = fig.add_subplot(111)
+#line1, = ax.plot([], [], 'r.') # Returns a tuple of line objects, thus the comma
 
-ax.set_ylim([-2,2])
-ax.set_xlim([-2,2])
+#ax.set_ylim([-2,2])
+#ax.set_xlim([-2,2])
 
 
 indivTime = [300.0]
@@ -105,9 +105,9 @@ def follow():
     a = float(list[1]) #x coordinate of user relative to LILI
     b = float(list[2]) #y coordinate of user relative to LILI
 
-    distF = 2 #distance behind person to follow
+    distF = 1.5 #distance behind person to follow
     
-    #find the point 2 meters behind the user on a straight line between the user and the robot
+    #find the point 1.5 meters behind the user on a straight line between the user and the robot
     if not a == 0:
         c = a - (distF/(1+(b/a)**2))**.5
         d = b - (b/a)*((distF/(1+(b/a)**2))**.5)
@@ -124,8 +124,8 @@ def follow():
             if lidar.lidarScan(0,i,0)>=100 and lidar.lidarScan(0,i,0)<=2000:
                 lidar_x.append(np.cos(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0+.13)
                 lidar_y.append(-np.sin(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0)
-        line1.set_data(lidar_x,lidar_y)
-        fig.canvas.draw()
+        #line1.set_data(lidar_x,lidar_y)
+        #fig.canvas.draw()
         r.goToGoal(c,d,[lidar_x,lidar_y])
     else:
         r.setvel(0, 0)
