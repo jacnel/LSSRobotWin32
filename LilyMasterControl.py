@@ -108,22 +108,20 @@ def follow():
     distF = 1.5 #distance behind person to follow
     
     #find the point 1.5 meters behind the user on a straight line between the user and the robot
-    if not a == 0:
-        c = a - (distF/(1+(b/a)**2))**.5
-        d = b - (b/a)*((distF/(1+(b/a)**2))**.5)
-    else: #user is directly in front of LILI
-        c = 0 
-        d = b - distF 
+    
+    c = a - distF*(a/((a**2+b**2)**0.5))
+    d = b - distF*(b/((a**2+b**2)**0.5))
+    
     
     #stop moving if bump sensor is being pressed, does not stop following
     if not r.isbumped():
         n = lidar.lidarScan(1,0,0)
-        lidar_x = []
-        lidar_y = []
+        lidar_x = [-5]
+        lidar_y = [0]
         for i in range(0,n):
-            if lidar.lidarScan(0,i,0)>=100 and lidar.lidarScan(0,i,0)<=2000:
+            if lidar.lidarScan(0,i,0)>=100 and lidar.lidarScan(0,i,0)<=1500:
                 lidar_x.append(np.cos(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0+.13)
-                lidar_y.append(-np.sin(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0)
+                lidar_y.append(np.sin(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0)
         #line1.set_data(lidar_x,lidar_y)
         #fig.canvas.draw()
         r.goToGoal(c,d,[lidar_x,lidar_y])
@@ -143,6 +141,7 @@ def checkReady():
 #adds command from KinectMonitor onto appropriate queue
 def KinectQueue():
     line = km.line.strip()
+    print line
     if line[:line.find(' ')] == "follow": #all information regarding following starts with the word "follow"
         qFollow.put(line)
     elif line[:line.find(' ')] == "face": #all information regarding faces start with the word "face"
@@ -213,7 +212,7 @@ def faceResponse():
         skeletonPersonIDs[int(parts[2])] = int(parts[3]) #add new user to dictionary
         readyTT = False
         sys.stderr.write("person is " + parts[3] + "\n")
-        if len(indivTime)<int(parts[3]):
+        if len(indivTime)<=int(parts[3]):
             for x in range(len(indivTime),int(parts[3])+1):
                 parts.append(300.0)
             sp.write("hello " + parts[3] + "\n")
@@ -365,7 +364,7 @@ sp.write("query\n")
 
 #start VoiceMonitor listening
 vm.write("start\n")
-
+strike = 0;
 #Waiting state: search for gestures from the kinect monitor
 while quit == False: # The user has not asked to quit.
     vm.tryReadLine()  # receive input from the voice monitor
@@ -376,9 +375,11 @@ while quit == False: # The user has not asked to quit.
     	indivTime[x] = indivTime[x]-0.2
     if not qFollow.empty(): #if there is a command in the qFollow queue
         follow()
+        strike = 0
     else:
+        strike=strike+1
         #stop following if the KinectMonitor stops sending values
-        if state == "following":
+        if state == "following" and strike>2:
             km.write('follow stop\n')
             
 # if there are items on the queue, try to respond

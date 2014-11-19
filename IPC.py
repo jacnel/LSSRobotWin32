@@ -57,6 +57,7 @@ def Sync():
     global oldTime
     curTime = time.time()
     if curTime-oldTime<1.0/refreshRate: #if process is keeping up
+        #sys.stderr.write("sleeping for "+str(1.0/refreshRate - (curTime-oldTime))+"\n")
         time.sleep(1.0/refreshRate - (curTime-oldTime))
     else: #if process is falling behind
         if warn:
