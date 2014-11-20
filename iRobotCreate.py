@@ -611,18 +611,18 @@ class iRobotCreate_real:
     def goToGoal(self, xGoal, yGoal, obst):
         
     	#print obst
-        print xGoal," ",yGoal
+        # print xGoal," ",yGoal
         #should be a 6 x 11 x 11 matrix of distances between trajectory path points and the goal point
         dist = ((self.xcoord - xGoal)**2 + (self.ycoord - yGoal)**2)**.5
-        # n = len(obst[0])
-        # obst_dist = np.zeros((6,11,11,n));
-        # for i in range(0,n):
-            # obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
+        n = len(obst[0])
+        obst_dist = np.zeros((6,11,11,n))
+        for i in range(0,n):
+            obst_dist[:,:,:,i]=((self.xcoord - obst[0][i])**2 + (self.ycoord - obst[1][i])**2)**.5
         #print obst_dist
         #quit()
         # print obst
         # quit()
-        dist = dist[:,:,10]#+(2000*np.sum(np.sum(obst_dist<.20,3),2)
+        dist = dist[:,:,10]+(2000*np.sum(np.sum(obst_dist<.20,3),2))
         #print dist
         
         index = dist.flatten().argmin()
@@ -630,7 +630,7 @@ class iRobotCreate_real:
         #find row and column of minimum value based off of flattened index
         rowNum = index/11
         colNum = index % 11
-        print self.xcoord[rowNum,colNum,10]," ",self.ycoord[rowNum,colNum,10]
+        # print self.xcoord[rowNum,colNum,10]," ",self.ycoord[rowNum,colNum,10]
         
         if(((xGoal)**2 + (yGoal)**2)**.5 < .2):
             
@@ -647,7 +647,8 @@ class iRobotCreate_real:
             mult = (self.vel+0.1*(self.v[rowNum]-self.vel)/abs(self.v[rowNum]-self.vel))/self.v[rowNum]
         self.vel = mult*self.v[rowNum]
         #move
-        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum]*(self.vel!=0))
+        self.setvel(mult*self.v[rowNum],mult*self.omega[colNum]*(self.vel!=0))                
+
                  
 
 
