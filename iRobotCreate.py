@@ -46,13 +46,13 @@ class iRobotCreate:
                 self.mode_handler = iRobotCreate_real( update_freq, optional_port_number)
 
 
-    def sim(self):
+    def sim(self,obst):
         """
             ***Only available in simultion mode***
             Once you give the create the commands, call sim to execute the simulation
         """
         if self.simulation:
-            self.mode_handler.sim()
+            self.mode_handler.sim(obst)
         else:
             raise InputError('Method cannot be called while not in simulation mode')
 
@@ -279,7 +279,7 @@ class iRobotCreate:
         #create 3D table of all end and path points from current point
         
         
-        horizon = 10 #horizon in seconds (robot moves at a maximum of 0.5 m/s)
+        horizon = 5 #horizon in seconds (robot moves at a maximum of 0.5 m/s)
         dt = 0.2
         self.num_steps = int(horizon/dt)
         self.xcoord = np.zeros((6, 11, self.num_steps+1))
@@ -586,7 +586,7 @@ class iRobotCreate_real:
         #create 3D table of all end and path points from current point
         
         
-        horizon = 10 #horizon in seconds (robot moves at a maximum of 0.5 m/s)
+        horizon = 5 #horizon in seconds (robot moves at a maximum of 0.5 m/s)
         dt = 0.2
         self.num_steps = int(horizon/dt)
         self.xcoord = np.zeros((6, 11, self.num_steps+1))
@@ -731,7 +731,7 @@ class iRobotSim():
 			self.sim_count = 0
 			self.real_time = False
 			
-	def sim(self): 
+	def sim(self,obst): 
 		'''SIM draws and simulates the robot motion based on the commands
 		This method needs to be called at the end of the complete program.
 		'''
@@ -786,11 +786,17 @@ class iRobotSim():
 			arrow_body = ax.add_patch(patches.Polygon( [ arrow_p1 , arrow_p2, arrow_p3] , fc = 'brown', zorder = 3)) 
 			
 			circle_body = ax.add_patch(plt.Circle([x,y], radius=self.radius,fc = 'yellow', zorder = 2))
-			
+			draw = [trail_line,circle_body,arrow_body]
+			n = 0
+			while n<len(obst[0]):
+				obstacle = ax.add_patch(plt.Circle([obst[0][n],obst[1][n]], radius=0.2,fc = 'red', zorder = 2))
+				draw.append(obstacle)
+				n+=1
 			
 			# Appending the artists to the list
-			artist_list.append([ trail_line,circle_body,arrow_body])
-		
+			artist_list.append(draw)
+			
+			
 		# animation 
 		s = time.time()
 		def robot_frame_plot(count):

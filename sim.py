@@ -5,7 +5,7 @@ import time
 r = iRobotCreate.iRobotCreate(1)
 dist = 0.2
 r.trajectory()
-
+r.set_trail_size(100)
 x = 5
 y = 2
 
@@ -20,11 +20,11 @@ yobst[2] = 0.2
 xobst[3] = 3
 yobst[3] = 0
 
-
+time = 0
 d=10000
 r.forward(0.1)
 print d
-while dist<d:
+while dist<d and time<100:
     [rx,ry,rt] = r.get_pose()
     xt = x-rx
     yt = y-ry
@@ -45,7 +45,8 @@ while dist<d:
     r.angle_sensor()
     d = ((rx-x)**2+(ry-y)**2)**0.5
     print xt,yt,rx,ry,rt,d
-
-r.sim()
+    time+=1
+obst = [xobst,yobst]
+r.sim(obst)
 
     
