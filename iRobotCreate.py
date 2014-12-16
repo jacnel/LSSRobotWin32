@@ -315,7 +315,7 @@ class iRobotCreate:
         #quit()
         # print obst
         # quit()
-        dist = dist.min(2)+(2000*np.sum(np.sum(obst_dist<.20,3),2))
+        dist = dist.min(2)+(200000*np.sum(np.sum(obst_dist<0.4,3),2))
         #print dist
         
         index = dist.flatten().argmin()
@@ -622,7 +622,7 @@ class iRobotCreate_real:
         #quit()
         # print obst
         # quit()
-        dist = dist.min(2)+(2000*np.sum(np.sum(obst_dist<.20,3),2))
+        dist = dist.min(2)+(200000*np.sum(np.sum(obst_dist<0.4,3),2))
         #print dist
         
         index = dist.flatten().argmin()
@@ -789,7 +789,7 @@ class iRobotSim():
 			draw = [trail_line,circle_body,arrow_body]
 			n = 0
 			while n<len(obst[0]):
-				obstacle = ax.add_patch(plt.Circle([obst[0][n],obst[1][n]], radius=0.2,fc = 'red', zorder = 2))
+				obstacle = ax.add_patch(plt.Circle([obst[0][n],obst[1][n]], radius=0.4,fc = 'red', zorder = 2))
 				draw.append(obstacle)
 				n+=1
 			
