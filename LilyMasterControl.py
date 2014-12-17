@@ -124,7 +124,10 @@ def follow():
                 lidar_y.append(np.sin(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0)
         #line1.set_data(lidar_x,lidar_y)
         #fig.canvas.draw()
-        r.goToGoal(c,d,[lidar_x,lidar_y])
+        print lidar_x
+        print lidar_y
+        quit()
+        #r.goToGoal(c,d,[lidar_x,lidar_y])
     else:
         r.setvel(0, 0)
     lastMoveTime = time.time()
