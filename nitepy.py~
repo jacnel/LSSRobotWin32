@@ -86,5 +86,3 @@ lib.getUserSkeletonR_FootConf.restype = ctypes.c_float
 lib.getUserSkeletonR_FootX.restype = ctypes.c_float
 lib.getUserSkeletonR_FootY.restype = ctypes.c_float
 lib.getUserSkeletonR_FootZ.restype = ctypes.c_float
-
-track = lib.Tracker_new()

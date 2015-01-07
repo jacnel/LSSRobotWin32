@@ -18,7 +18,7 @@ userOfInt=0
 quits = False
 e = threading.Event()
 lock.release()
-
+track = lib.Tracker_new()
 
 curSkeletonPersonIDs = {} #dictionary where a skeletonID is paired with a personID
 oldSkeletonPersonIDs = {} #old version of curSkeletonPersonIDs dictionary, used to check for changes
