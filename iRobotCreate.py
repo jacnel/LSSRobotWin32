@@ -301,7 +301,7 @@ class iRobotCreate:
         
     #Added by CJG
     #trajectory method must be called before use
-    def goToGoal(self, xGoal, yGoal, obst):
+    def goToGoal(self, xGoal, yGoal, yTarget, obst):
         
     	#print obst
         # print xGoal," ",yGoal
@@ -315,7 +315,7 @@ class iRobotCreate:
         #quit()
         # print obst
         # quit()
-        dist = dist.min(2)+(200000*np.sum(np.sum(obst_dist<0.4,3),2))
+        dist = dist.min(2)+(200000*np.sum(np.sum(obst_dist<0.2,3),2))
         #print dist
         
         index = dist.flatten().argmin()
@@ -325,19 +325,27 @@ class iRobotCreate:
         colNum = index % 11
         # print self.xcoord[rowNum,colNum,10]," ",self.ycoord[rowNum,colNum,10]
         
+            
+            
         if(((xGoal)**2 + (yGoal)**2)**.5 < .2):
             
             if abs(self.vel-0)>0.05:
-                self.vel = (self.vel+0.1*(0-self.vel)/abs(0-self.vel))
+                self.vel = (self.vel+0.05*(0-self.vel)/abs(0-self.vel))
             else:
                 self.vel=0
+            
+                if np.abs(yTarget)>.1:
+                    self.setvel(0,yTarget)
+                else:
+                    self.setvel(0,0)
+                return
             self.setvel(self.vel,0)
             return
         
         
         mult = 1
         if abs(self.vel-self.v[rowNum])>0.05 and self.v[rowNum]!=0:
-            mult = (self.vel+0.1*(self.v[rowNum]-self.vel)/abs(self.v[rowNum]-self.vel))/self.v[rowNum]
+            mult = (self.vel+0.05*(self.v[rowNum]-self.vel)/abs(self.v[rowNum]-self.vel))/self.v[rowNum]
         self.vel = mult*self.v[rowNum]
         #move
         self.setvel(mult*self.v[rowNum],mult*self.omega[colNum]*(self.vel!=0))                
@@ -622,7 +630,7 @@ class iRobotCreate_real:
         #quit()
         # print obst
         # quit()
-        dist = dist.min(2)+(200000*np.sum(np.sum(obst_dist<0.4,3),2))
+        dist = dist.min(2)+(200000*np.sum(np.sum(obst_dist<0.2,3),2))
         #print dist
         
         index = dist.flatten().argmin()
@@ -635,7 +643,7 @@ class iRobotCreate_real:
         if(((xGoal)**2 + (yGoal)**2)**.5 < .2):
             
             if abs(self.vel-0)>0.05:
-                self.vel = (self.vel+0.1*(0-self.vel)/abs(0-self.vel))
+                self.vel = (self.vel+0.05*(0-self.vel)/abs(0-self.vel))
             else:
                 self.vel=0
             self.setvel(self.vel,0)
@@ -644,7 +652,7 @@ class iRobotCreate_real:
         
         mult = 1
         if abs(self.vel-self.v[rowNum])>0.05 and self.v[rowNum]!=0:
-            mult = (self.vel+0.1*(self.v[rowNum]-self.vel)/abs(self.v[rowNum]-self.vel))/self.v[rowNum]
+            mult = (self.vel+0.05*(self.v[rowNum]-self.vel)/abs(self.v[rowNum]-self.vel))/self.v[rowNum]
         self.vel = mult*self.v[rowNum]
         #move
         self.setvel(mult*self.v[rowNum],mult*self.omega[colNum]*(self.vel!=0))                
@@ -789,7 +797,7 @@ class iRobotSim():
 			draw = [trail_line,circle_body,arrow_body]
 			n = 0
 			while n<len(obst[0]):
-				obstacle = ax.add_patch(plt.Circle([obst[0][n],obst[1][n]], radius=0.4,fc = 'red', zorder = 2))
+				obstacle = ax.add_patch(plt.Circle([obst[0][n],obst[1][n]], radius=0.2,fc = 'red', zorder = 2))
 				draw.append(obstacle)
 				n+=1
 			

@@ -116,18 +116,16 @@ def follow():
     #stop moving if bump sensor is being pressed, does not stop following
     if not r.isbumped():
         n = lidar.lidarScan(1,0,0)
+
         lidar_x = [-5]
         lidar_y = [0]
         for i in range(0,n):
             if lidar.lidarScan(0,i,0)>=100 and lidar.lidarScan(0,i,0)<=1500:
-                lidar_x.append(np.cos(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0+.13)
-                lidar_y.append(np.sin(((240)*(i/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0)
+                lidar_x.append(np.cos(((240)*(i*1.0/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0+.13)
+                lidar_y.append(-np.sin(((240)*(i*1.0/n)-120)*3.1415/180)*lidar.lidarScan(0,i,0)/1000.0)
         #line1.set_data(lidar_x,lidar_y)
         #fig.canvas.draw()
-        print lidar_x
-        print lidar_y
-        quit()
-        #r.goToGoal(c,d,[lidar_x,lidar_y])
+        r.goToGoal(c,d,b,[lidar_x,lidar_y])
     else:
         r.setvel(0, 0)
     lastMoveTime = time.time()

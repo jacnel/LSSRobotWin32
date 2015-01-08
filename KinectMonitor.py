@@ -20,6 +20,7 @@ quits = False
 e = threading.Event()
 lock.release()
 
+pose = poses()
 
 curSkeletonPersonIDs = {} #dictionary where a skeletonID is paired with a personID
 oldSkeletonPersonIDs = {} #old version of curSkeletonPersonIDs dictionary, used to check for changes
@@ -67,19 +68,19 @@ def detect_motion():
                 follstate.append(0)
                 
             if lstage[user]=="none":  #nothing has happened yet, check if the arm is in a position of interest
-                if lib.getUserSkeletonL_HandX(track,user)-lib.getUserSkeletonL_ElbowX(track,user)>100 or poses.LeftArmAboveLeftSh(user)<200:
-                    if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0 or poses.LeftArmAboveLeftSh(user)<200:
+                if lib.getUserSkeletonL_HandX(track,user)-lib.getUserSkeletonL_ElbowX(track,user)>100 or poses.LeftArmAboveLeftSh(pose,user)<200:
+                    if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0 or poses.LeftArmAboveLeftSh(pose,user)<200:
                         lstage[user] = "ready"
-                        lstate[user] = poses.LeftArmExtLeft(user)
+                        lstate[user] = poses.LeftArmExtLeft(pose,user)
             if lstage[user]=="ready":#we hit one point of interest, move to the next if the arm has met the new POI
             	#TODO update lstate (allow nonmonotonicity within the ranges that got use to the "ready" state (200))
-            	if poses.LeftArmAboveLeftSh(user)<200:
-            		lstate[user] = poses.LeftArmExtLeft(user)
+            	if poses.LeftArmAboveLeftSh(pose,user)<200:
+            		lstate[user] = poses.LeftArmExtLeft(pose,user)
             	else:
-            		if lstate[user] < poses.LeftArmExtLeft(user):
+            		if lstate[user] < poses.LeftArmExtLeft(pose,user):
             			lstage[user] = "none"
-            		lstate[user] = poses.LeftArmExtLeft(user)
-            		if poses.LeftArmExtLeft(user)<200:
+            		lstate[user] = poses.LeftArmExtLeft(pose,user)
+            		if poses.LeftArmExtLeft(pose,user)<200:
             			sys.stderr.write("left wave detected!!!!\n")
             			lstage[user] = "none"
             			lock.acquire()
