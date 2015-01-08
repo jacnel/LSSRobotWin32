@@ -30,7 +30,7 @@ class poses:
 		dist = (-lib.getUserSkeletonL_HandX(track,user)+lib.getUserSkeletonL_ShX(track,user))-2*(lib.getUserSkeleton_NeckY(track,user)-lib.getUserSkeleton_TorsoY(track,user))
 		return dist
 
-	def LeftArmAboveLeftSh(user): #TODO define correctly
+	def LeftArmAboveLeftSh(user):
 		dist = abs((lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ShY(track,user))-0.5*(lib.getUserSkeleton_NeckY(track,user)-lib.getUserSkeleton_TorsoY(track,user)))+abs(lib.getUserSkeletonL_HandX(track,user)-lib.getUserSkeletonL_ShX(track,user))
 		return dist
 		
