@@ -116,7 +116,7 @@ def follow():
     #stop moving if bump sensor is being pressed, does not stop following
     if not r.isbumped():
         n = lidar.lidarScan(1,0,0)
-
+        print n
         lidar_x = [-5]
         lidar_y = [0]
         for i in range(0,n):

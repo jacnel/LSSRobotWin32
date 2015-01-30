@@ -27,7 +27,7 @@ while 1:
     th = np.arange(n)*240.0/n-120
     x=np.multiply(data,np.cos(th*3.1415/180))
     y=np.multiply(data,np.sin(th*3.1415/180))
-    print x[0]
+    print x[n/2]
     print count
     count = count +1
     # line1.set_data(x,y)

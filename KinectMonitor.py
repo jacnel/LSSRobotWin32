@@ -68,26 +68,11 @@ def detect_motion():
                 follstate.append(0)
                 
             if lstage[user]=="none":  #nothing has happened yet, check if the arm is in a position of interest
-                if lib.getUserSkeletonL_HandX(track,user)-lib.getUserSkeletonL_ElbowX(track,user)>100 or poses.LeftArmAboveLeftSh(pose,user)<200:
-                    if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0 or poses.LeftArmAboveLeftSh(pose,user)<200:
+                if lib.getUserSkeletonL_HandX(track,user)-lib.getUserSkeletonL_ElbowX(track,user)>100:# or poses.LeftArmAboveLeftSh(pose,user)<200:
+                    if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0:# or poses.LeftArmAboveLeftSh(pose,user)<200:
                         lstage[user] = "ready"
-                        lstate[user] = poses.LeftArmExtLeft(pose,user)
+                        #lstate[user] = poses.LeftArmExtLeft(pose,user)
             if lstage[user]=="ready":#we hit one point of interest, move to the next if the arm has met the new POI
-            	#TODO update lstate (allow nonmonotonicity within the ranges that got use to the "ready" state (200))
-            	if poses.LeftArmAboveLeftSh(pose,user)<200:
-            		lstate[user] = poses.LeftArmExtLeft(pose,user)
-            	else:
-            		if lstate[user] < poses.LeftArmExtLeft(pose,user):
-            			lstage[user] = "none"
-            		lstate[user] = poses.LeftArmExtLeft(pose,user)
-            		if poses.LeftArmExtLeft(pose,user)<200:
-            			sys.stderr.write("left wave detected!!!!\n")
-            			lstage[user] = "none"
-            			lock.acquire()
-                        leftWave = True
-                        gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
-                        lock.release()
-            		
                 if lib.getUserSkeletonL_ElbowX(track,user)-lib.getUserSkeletonL_HandX(track,user)>100:
                     if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)>0:
                         lstage[user] = "none"
@@ -96,7 +81,7 @@ def detect_motion():
                         gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
                         sys.stderr.write("got left wave from user "+str(user) +"\n")
                         lock.release()
-            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)<0 or lib.getUserSkeletonL_ElbowConf(track,user)<=0.5:
+            if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)<0:# or lib.getUserSkeletonL_ElbowConf(track,user)<=0.5:
                 lstage[user] = "none"#we hit a point that is un acceptable for this gesture, cancel it
                 
             if rstage[user]=="none":#nothing has happened yet, check if the arm is in a position of interest

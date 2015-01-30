@@ -327,7 +327,7 @@ class iRobotCreate:
         
             
             
-        if(((xGoal)**2 + (yGoal)**2)**.5 < .2):
+        if(((xGoal)**2 + (yGoal)**2)**.5 < .2) or self.v[rowNum]<0.05:
             
             if abs(self.vel-0)>0.05:
                 self.vel = (self.vel+0.05*(0-self.vel)/abs(0-self.vel))
