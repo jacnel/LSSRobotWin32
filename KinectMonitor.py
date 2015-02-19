@@ -186,12 +186,13 @@ def detect_motion():
 					print skasps[i]
 					print aspects[0]
 					framecount=0
+				#TODO: verify that curSPID is cleaned and maintained properly
 				if not lib.getUserID(track, user) in curSkeletonPersonIDs:
 					curSkeletonPersonIDs[lib.getUserID(track, user)] = -1
 				if curSkeletonPersonIDs[lib.getUserID(track, user)]<0:
 					for j in range(0,len(aspects)):#check for similarity
-						if skasps[i][1] < aspects[j][1]*1.2 and skasps[i][1] > aspects[j][1]*0.8:
-							if skasps[i][2] < aspects[j][2]*1.2 and skasps[i][2] > aspects[j][2]*0.8:
+						if skasps[i][1] < aspects[j][1]*1.05 and skasps[i][1] > aspects[j][1]*0.95:
+							if skasps[i][2] < aspects[j][2]*1.05 and skasps[i][2] > aspects[j][2]*0.95:
 								#if skasps[i][3] < aspects[j][3]*1.2 and skasps[i][3] > aspects[j][3]*0.8:
 								#TODO: send notification of recognition and set appropriate values
 								curSkeletonPersonIDs[lib.getUserID(track, user)] = aspects[j][0]
