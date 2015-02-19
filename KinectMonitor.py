@@ -194,7 +194,7 @@ def detect_motion():
 							if skasps[i][2] < aspects[j][2]*1.2 and skasps[i][2] > aspects[j][2]*0.8:
 								#if skasps[i][3] < aspects[j][3]*1.2 and skasps[i][3] > aspects[j][3]*0.8:
 								#TODO: send notification of recognition and set appropriate values
-								curSkeletonPersonIDs[lib.getUserID(track, user)] = aspects[0]
+								curSkeletonPersonIDs[lib.getUserID(track, user)] = aspects[j][0]
 								p.write("face recognized " + str(lib.getUserID(track, user)) + " " + str(curSkeletonPersonIDs[lib.getUserID(track, user)]) + " " + str(time.time()) + "\n")
 								sys.stderr.write("Proportions match! Skeleton " + str(lib.getUserID(track, user)) + " identified as person: " + str(curSkeletonPersonIDs[lib.getUserID(track, user)]) + "\n")
 								personIDAttempts[key] = MAX_GUESSES + 1
@@ -202,7 +202,7 @@ def detect_motion():
 			
 			   
 			
-			#keys are skeleton id's (not indexies)
+		#keys are skeleton id's (not indexies)
 		for key in curSkeletonPersonIDs.keys():
 			if curSkeletonPersonIDs[key]>=0:
 				found = False
