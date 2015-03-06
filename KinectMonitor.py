@@ -4,9 +4,12 @@ from poses import *
 import threading
 import thread
 import sys
+import clr
 import numpy as np
 
-
+clr.AddReference('FTCHpy')
+import FTCHpy
+ftch = FTCHpy.FTCHcalc
 
 lock = threading.Lock()
 lock.acquire()
@@ -259,7 +262,8 @@ def facialActions():
 		
 		lock.acquire()
 		for user in range(0, lib.getUsersCount(track)):
-			curSkeletonPersonIDs[lib.getUserID(track, user)] = lib.getUserPersonID(track, user) #for each user, match skeletonID to personID
+			if curSkeletonPersonIDs[lib.getUserID(track, user)] < 0: # user could have been recognized by shirt/height
+				curSkeletonPersonIDs[lib.getUserID(track, user)] = lib.getUserPersonID(track, user) #for each user, match skeletonID to personID
 			if not lib.getUserID(track, user) in personIDAttempts.keys():
 				personIDAttempts[lib.getUserID(track, user)] = 0
 			tempSkelIDs.append(lib.getUserID(track, user))
@@ -321,6 +325,10 @@ def facialActions():
 			del curSkeletonPersonIDs[key] #removes from dictionary any skeletons that have left the field of vision
 			del personIDAttempts[key] #removes skeleton that has been lost so that the skeletonID can be reused
 		oldSkeletonPersonIDs = dict(curSkeletonPersonIDs)
+		#load in pixel values (FCTH)
+		#run calculation
+		#retrieve ressult values
+		#store and compare
 		lock.release()
 	   
 		time.sleep(.3)
