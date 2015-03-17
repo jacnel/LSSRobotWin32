@@ -1,0 +1,14 @@
+lili demo:
+
+Recognize user.
+
+follow user through obstacles laid out on the floor. 
+
+voice command to turn lili around and or move to new start location.
+
+follow back through obstacles.
+
+Possibly use new shirt recognition. 
+
+
+

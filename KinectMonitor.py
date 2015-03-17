@@ -9,12 +9,13 @@ import numpy as np
 
 clr.AddReference('FTCHpy')
 import FTCHpy
-ftch = FTCHpy.FTCHcalc
+ftch = FTCHpy.FTCHcalc()
 
 lock = threading.Lock()
 lock.acquire()
 aspects = [[0,-1,-1,-1]] #person id,hips-head dist,sh dist,sh-elbow
 skasps = [[0,-1,-1,-1]]  #skeleton id, ...
+shirts = [] #will contain elements like [0,range(0,192) ([user,shirt analysis result])
 rightWave=False
 leftWave =False
 follow = False
@@ -27,7 +28,7 @@ lock.release()
 
 pose = poses()
 
-curSkeletonPersonIDs = {} #dictionary where a skeletonID is paired with a personID
+curSkeletonPersonIDs = {} #dictionary where a skeletonID (not index) is paired with a personID
 oldSkeletonPersonIDs = {} #old version of curSkeletonPersonIDs dictionary, used to check for changes
 personIDAttempts = {} #dictionary where a skeletonID is paired with the number of attempts made to identify the person
 
@@ -262,7 +263,7 @@ def facialActions():
 		
 		lock.acquire()
 		for user in range(0, lib.getUsersCount(track)):
-			if curSkeletonPersonIDs[lib.getUserID(track, user)] < 0: # user could have been recognized by shirt/height
+			if lib.getUserPersonID(track, user) > 0: # user could have been recognized by shirt/height
 				curSkeletonPersonIDs[lib.getUserID(track, user)] = lib.getUserPersonID(track, user) #for each user, match skeletonID to personID
 			if not lib.getUserID(track, user) in personIDAttempts.keys():
 				personIDAttempts[lib.getUserID(track, user)] = 0
@@ -271,6 +272,8 @@ def facialActions():
 		for key in curSkeletonPersonIDs: #for every skeletonID that has been created
 			if not key in tempSkelIDs: #check if it is still on screen
 				curSkeletonPersonIDs[key] = -5 #skeleton is no longer on screen
+		
+		checkShirts()
 		
 		deleteKeys = [] #holds keys to be deleted
 		#check for any changes in the personIDs that correspond to the skeletonIDs
@@ -325,14 +328,58 @@ def facialActions():
 			del curSkeletonPersonIDs[key] #removes from dictionary any skeletons that have left the field of vision
 			del personIDAttempts[key] #removes skeleton that has been lost so that the skeletonID can be reused
 		oldSkeletonPersonIDs = dict(curSkeletonPersonIDs)
-		#load in pixel values (FCTH)
-		#run calculation
-		#retrieve ressult values
-		#store and compare
+		
 		lock.release()
 	   
 		time.sleep(.3)
 				
+def checkShirts():
+	global shirts
+	for index in range(0,lib.getUsersCount(track)):
+		if lib.getShirt(track,index)==0:
+			ftch.setImageSize(lib.getShirtSizeX(track), lib.getShirtSizeY(track))
+			for x in range(0,lib.getShirtSizeX(track)):
+				for y in range(0,lib.getShirtSizeY(track)):
+					ftch.setVal(x,y,lib.getColor(track,x,y))#load in pixel values (FCTH)
+			ftch.calc()#run calculation
+			result = range(0,192)
+			for i in range(0,192):
+				result[i] = ftch.result(i)#retrieve result values
+			match = -1 #last location of match found to the personID in shirts
+			diff = np.zeros(len(shirts))
+			for i in range(0,len(shirts)):
+				if curSkeletonPersonIDs[lib.getUserPersonID(track,index)] = shirts[i][0]:#already have shirt data
+					
+					diff[i] = 0
+					for j in range(0,192):
+						diff[i] = diff[i] + (shirts[i][1][j] - result[j])**2 #square difference
+					
+					if diff[i]>192*2:
+						if match>=0:
+								shirts[match][1] = shirts[i][1]
+								shirts[i][1] = result #clearly this shirt value should be updated (the user has a new shirt)
+							break
+					else:
+						for j in range(0,192):#merge old results with new ones
+							shirts[i][1][j] = (shirts[i][1][j] + result[j])/2
+						break
+					match=i
+			if curSkeletonPersonIDs[lib.getUserPersonID(track,index)]>=0:
+				if match<0:
+					#add 2 entries to shirts
+					shirts.append([curSkeletonPersonIDs[lib.getUserPersonID(track,index)],result])
+					shirts.append([curSkeletonPersonIDs[lib.getUserPersonID(track,index)],result])
+			else:
+				for i in range(0,len(shirts)):
+					if diff[i]<=192*2:#compare to recorded
+						curSkeletonPersonIDs[lib.getUserPersonID(track,index)] = shirts[i][0]
+						break#successful recognition
+				
+		
+		
+		
+		
+		#store and compare
 								
 def handleLine():
 	global userOfInt
