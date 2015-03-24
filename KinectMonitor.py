@@ -156,12 +156,13 @@ def detect_motion():
 					quitstage[user]="scut"
 			if quitstage[user]=="scut":#we hit one point of interest, move to the next if the arm has met the new POI
 				if lib.getUserSkeletonR_HandX(track,user)-lib.getUserSkeletonNeckX(track,user)>50:
-					quitstage[user]="none"
-					lock.acquire()
-					quits = True
-					gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
-					sys.stderr.write("goodbye "+str(user)+"\n")
-					lock.release()
+					if lib.getUserID(track,user) in curSkeletonPersonIDs and curSkeletonPersonIDs[lib.getUserID(track,user)]>=0:
+						quitstage[user]="none"
+						lock.acquire()
+						quits = True
+						gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
+						sys.stderr.write("goodbye "+str(user)+"\n")
+						lock.release()
 			if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonNeckY(track,user)<0 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
 				quitstage[user]="none"#invalid for the quit gesture
 			if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonHeadY(track,user)>0 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
@@ -348,40 +349,47 @@ def checkShirts():
 						flag = 1
 					ftch.setVal(x,y,color)#load in pixel values (FCTH)
 			if flag == 1: #bad data
-				print "skipping"
+				sys.stderr.write("skipping\n")
 				continue
 			ftch.calc()#run calculation
 			result = range(0,192)
+			sum = 0
 			for i in range(0,192):
 				result[i] = ftch.result(i)#retrieve result values
+				sum=sum+result[i]
+			sys.stderr.write(str(sum)+"\n")
 			match = -1 #last location of match found to the personID in shirts
 			diff = np.zeros(len(shirts))
 			for i in range(0,len(shirts)):
-				if lib.getUserPersonID(track,index) in curSkeletonPersonIDs and curSkeletonPersonIDs[lib.getUserPersonID(track,index)] == shirts[i][0]:#already have shirt data
-					
+				sys.stderr.write("\n"+str(shirts[i][0])+"\n\n")
+				if lib.getUserID(track,index) in curSkeletonPersonIDs and curSkeletonPersonIDs[lib.getUserID(track,index)] == shirts[i][0]:#already have shirt data
 					diff[i] = 0
 					for j in range(0,192):
 						diff[i] = diff[i] + (shirts[i][1][j] - result[j])**2 #square difference
-					
+					sys.stderr.write(str(diff[i])+"\n")
 					if diff[i]>75:
 						if match>=0:
 							shirts[match][1] = shirts[i][1]
 							shirts[i][1] = result #clearly this shirt value should be updated (the user has a new shirt)
+							match=i
 							break
-					else:
+					else: 
 						for j in range(0,192):#merge old results with new ones
 							shirts[i][1][j] = (shirts[i][1][j] + result[j])/2
+						match=i
 						break
 					match=i
-			if lib.getUserPersonID(track,index) in curSkeletonPersonIDs and curSkeletonPersonIDs[lib.getUserPersonID(track,index)]>=0:
+			if lib.getUserID(track,index) in curSkeletonPersonIDs and curSkeletonPersonIDs[lib.getUserID(track,index)]>=0:
 				if match<0:
 					#add 2 entries to shirts
-					shirts.append([curSkeletonPersonIDs[lib.getUserPersonID(track,index)],result])
-					shirts.append([curSkeletonPersonIDs[lib.getUserPersonID(track,index)],result])
+					shirts.append([curSkeletonPersonIDs[lib.getUserID(track,index)],result])
+					shirts.append([curSkeletonPersonIDs[lib.getUserID(track,index)],result])
+					sys.stderr.write("recorded shirts\n")
+					sys.stderr.write(str(len(shirts))+"\n")
 			else:
 				for i in range(0,len(shirts)):
 					if diff[i]<=75:#compare to recorded
-						curSkeletonPersonIDs[lib.getUserPersonID(track,index)] = shirts[i][0]
+						curSkeletonPersonIDs[lib.getUserID(track,index)] = shirts[i][0]
 						break#successful recognition
 				
 		
