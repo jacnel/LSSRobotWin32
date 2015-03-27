@@ -87,4 +87,7 @@ lib.getUserSkeletonR_FootX.restype = ctypes.c_float
 lib.getUserSkeletonR_FootY.restype = ctypes.c_float
 lib.getUserSkeletonR_FootZ.restype = ctypes.c_float
 
+lib.getShirtSizeY.restype = ctypes.c_int
+lib.getShirtSizeX.restype = ctypes.c_int
+
 track = lib.Tracker_new()

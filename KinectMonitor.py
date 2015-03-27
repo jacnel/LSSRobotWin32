@@ -11,6 +11,9 @@ clr.AddReference('FTCHpy')
 import FTCHpy
 ftch = FTCHpy.FTCHcalc()
 
+followloss = -1 #the user that was lost while following
+pickupfollow=False
+
 lock = threading.Lock()
 lock.acquire()
 aspects = [[0,-1,-1,-1]] #person id,hips-head dist,sh dist,sh-elbow
@@ -252,6 +255,9 @@ def facialActions():
 	global curSkeletonPersonIDs
 	global oldSkeletonPersonIDs
 	global personIDAttempts
+	global followloss
+	global userOfInt
+	global pickupfollow
 	
 	while True:
 		e.wait() #pauses thread if main thread flag is cleared
@@ -285,7 +291,10 @@ def facialActions():
 						#person is now recognized
 						p.write("face recognized " + str(key) + " " + str(curSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
 						personIDAttempts[key] = MAX_GUESSES + 1
-						
+						if curSkeletonPersonIDs[key] == followloss and pickupfollow:
+							userOfInt = key #follow last user followed
+							follow = True
+							sys.stderr.write("got follow from userID "+str(userOfInt)+"\n")
 						sys.stderr.write("recognized skeleton: " + str(key) + " as person: " + str(curSkeletonPersonIDs[key]) + "\n")
 					elif curSkeletonPersonIDs[key] < 0 and oldSkeletonPersonIDs[key] >= 0:
 						#recognized person has left the frame
@@ -322,6 +331,11 @@ def facialActions():
 					p.write("face recognized " + str(key) + " " + str(curSkeletonPersonIDs[key]) + " " + str(time.time()) + "\n")
 					personIDAttempts[key] = MAX_GUESSES + 1
 					sys.stderr.write("recognized skeleton: " + str(key) + " as person: " + str(curSkeletonPersonIDs[key]) + "\n")
+					if curSkeletonPersonIDs[key] == followloss and pickupfollow:
+						userOfInt = key #follow last user followed
+						follow = True
+						sys.stderr.write("got follow from userID "+str(userOfInt)+"\n")
+
 				else:
 					sys.stderr.write("first guess fail " + str(key) + "\n")
 		for key in deleteKeys:
@@ -338,9 +352,9 @@ def checkShirts():
 	global shirts
 	for index in range(0,lib.getUsersCount(track)):
 		if lib.getShirt(track,index)==0:
-			#print lib.getShirtSizeY(track)
-			#print lib.getShirtSizeX(track)
-			ftch.setImageSize(lib.getShirtSizeX(track), lib.getShirtSizeY(track))
+			sizeY = abs(lib.getShirtSizeY(track))
+			sizeX = abs(lib.getShirtSizeX(track))
+			ftch.setImageSize(sizeX, sizeY)
 			flag = 0
 			for x in range(0,lib.getShirtSizeX(track)):
 				for y in range(0,lib.getShirtSizeY(track)):
@@ -357,16 +371,16 @@ def checkShirts():
 			for i in range(0,192):
 				result[i] = ftch.result(i)#retrieve result values
 				sum=sum+result[i]
-			sys.stderr.write(str(sum)+"\n")
+			#sys.stderr.write(str(sum)+"\n")
 			match = -1 #last location of match found to the personID in shirts
 			diff = np.zeros(len(shirts))
 			for i in range(0,len(shirts)):
-				sys.stderr.write("\n"+str(shirts[i][0])+"\n\n")
+				#sys.stderr.write("\n"+str(shirts[i][0])+"\n\n")
 				if lib.getUserID(track,index) in curSkeletonPersonIDs and curSkeletonPersonIDs[lib.getUserID(track,index)] == shirts[i][0]:#already have shirt data
 					diff[i] = 0
 					for j in range(0,192):
 						diff[i] = diff[i] + (shirts[i][1][j] - result[j])**2 #square difference
-					sys.stderr.write(str(diff[i])+"\n")
+					#sys.stderr.write(str(diff[i])+"\n")
 					if diff[i]>75:
 						if match>=0:
 							shirts[match][1] = shirts[i][1]
@@ -384,8 +398,8 @@ def checkShirts():
 					#add 2 entries to shirts
 					shirts.append([curSkeletonPersonIDs[lib.getUserID(track,index)],result])
 					shirts.append([curSkeletonPersonIDs[lib.getUserID(track,index)],result])
-					sys.stderr.write("recorded shirts\n")
-					sys.stderr.write(str(len(shirts))+"\n")
+					#sys.stderr.write("recorded shirts\n")
+					#sys.stderr.write(str(len(shirts))+"\n")
 			else:
 				for i in range(0,len(shirts)):
 					if diff[i]<=75:#compare to recorded
@@ -431,6 +445,7 @@ p = process(True,"KM")
 p.setOnReadLine(handleLine)
 InitSync()
 e.set()
+
 while True:
 	p.tryReadLine()
 	lock.acquire()
@@ -444,6 +459,7 @@ while True:
 		exit()
 	if follow:
 		#sys.stderr.write(str(track) + " " + str(userOfInt) + "\n")
+		pickupfollow=False
 		user = -1
 		index = 0
 		while index<lib.getUsersCount(track): #find index of userOfInt which is a UserID. (user is an index)
@@ -455,13 +471,16 @@ while True:
 			if lib.isUserTracked(track, user):
 				#sys.stderr.write("is following\n")
 				if userOfInt in curSkeletonPersonIDs.keys() and curSkeletonPersonIDs[userOfInt] >= 0: #user is recognized and skeletonID should be sent
+					followloss = curSkeletonPersonIDs[userOfInt]
 					p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(userOfInt) + " " + str(time.time()) + "\n")
 				else: #user is unrecognized, send anyways in case follow was started by voice command and let the master control handle. should not send skeletonID.
 					p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(time.time()) + "\n")
 			else:#they aren't tracked
 				stopfollow = True
+				pickupfollow=True
 		else:#they're not here
 			stopfollow = True
+			pickupfollow=True
 	if rightWave:
 		rightWave=False
 		p.write("rightWave " + str(gestGivenPID) + " " + str(time.time()) + "\n") #if person is unknown, master control/speaking program will handle
