@@ -51,6 +51,7 @@ def detect_motion():
 	global leftWave
 	global follow
 	global stopfollow
+	global pickupfollow
 	global userOfInt
 	global quits
 	global track
@@ -145,6 +146,7 @@ def detect_motion():
 						lock.acquire()
 						userOfInt = lib.getUserID(track,user)
 						stopfollow = True
+						pickupfollow = False
 						sys.stderr.write("got stop follow from user "+str(user)+"\n")
 						lock.release()
 			if abs(lib.getUserSkeletonL_HandZ(track,user)-lib.getUserSkeletonR_HandZ(track,user))>100 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
@@ -258,7 +260,7 @@ def facialActions():
 	global followloss
 	global userOfInt
 	global pickupfollow
-	
+	global follow
 	while True:
 		e.wait() #pauses thread if main thread flag is cleared
 		lock.acquire()
@@ -416,6 +418,7 @@ def handleLine():
 	global userOfInt
 	global follow
 	global stopfollow
+	global pickupfollow
 	if p.line == "follow\n": #follow command comes from master control because the follow speech command was given
 		if lib.getUsersCount(track)>0:
 			lock.acquire()
@@ -427,6 +430,7 @@ def handleLine():
 			sys.stderr.write("no users\n")
 	elif p.line == "follow stop\n": #follow stop command from master control because the stop command was given by speech
 		stopfollow = True
+		pickupfollow = False
 		follow = False
 		sys.stderr.write("got stop follow\n")
 	elif p.line == "sleep\n":
@@ -459,7 +463,7 @@ while True:
 		exit()
 	if follow:
 		#sys.stderr.write(str(track) + " " + str(userOfInt) + "\n")
-		pickupfollow=False
+		pickupfollow=True
 		user = -1
 		index = 0
 		while index<lib.getUsersCount(track): #find index of userOfInt which is a UserID. (user is an index)
@@ -477,10 +481,10 @@ while True:
 					p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(time.time()) + "\n")
 			else:#they aren't tracked
 				stopfollow = True
-				pickupfollow=True
+				
 		else:#they're not here
 			stopfollow = True
-			pickupfollow=True
+			
 	if rightWave:
 		rightWave=False
 		p.write("rightWave " + str(gestGivenPID) + " " + str(time.time()) + "\n") #if person is unknown, master control/speaking program will handle
