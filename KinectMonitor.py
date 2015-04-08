@@ -93,7 +93,10 @@ def detect_motion():
 						lstage[user] = "none"
 						lock.acquire()
 						leftWave = True
-						gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
+						if lib.getUserID(track, user) in curSkeletonPersonIDs:
+							gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
+						else:
+							gestGivenPID = -1
 						sys.stderr.write("got left wave from user "+str(user) +"\n")
 						lock.release()
 			if lib.getUserSkeletonL_HandY(track,user)-lib.getUserSkeletonL_ElbowY(track,user)<0:# or lib.getUserSkeletonL_ElbowConf(track,user)<=0.5:
@@ -109,7 +112,10 @@ def detect_motion():
 						rstage[user] = "none"
 						lock.acquire()
 						rightWave = True
-						gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
+						if lib.getUserID(track, user) in curSkeletonPersonIDs:
+							gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
+						else:
+							gestGivenPID = -1
 						sys.stderr.write("got right wave from user "+str(user)+"\n")
 						lock.release()
 			if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonR_ElbowY(track,user)<0 or lib.getUserSkeletonR_ElbowConf(track,user)<=0.5:
@@ -165,7 +171,10 @@ def detect_motion():
 						quitstage[user]="none"
 						lock.acquire()
 						quits = True
-						gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
+						if lib.getUserID(track, user) in curSkeletonPersonIDs:
+							gestGivenPID = curSkeletonPersonIDs[lib.getUserID(track, user)]
+						else:
+							gestGivenPID = -1
 						sys.stderr.write("goodbye "+str(user)+"\n")
 						lock.release()
 			if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonNeckY(track,user)<0 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
@@ -354,8 +363,8 @@ def checkShirts():
 	global shirts
 	for index in range(0,lib.getUsersCount(track)):
 		if lib.getShirt(track,index)==0:
-			sizeY = abs(lib.getShirtSizeY(track))
-			sizeX = abs(lib.getShirtSizeX(track))
+			sizeY = abs(int(lib.getShirtSizeY(track)))
+			sizeX = abs(int(lib.getShirtSizeX(track)))
 			ftch.setImageSize(sizeX, sizeY)
 			flag = 0
 			for x in range(0,lib.getShirtSizeX(track)):
@@ -367,7 +376,9 @@ def checkShirts():
 			if flag == 1: #bad data
 				sys.stderr.write("skipping\n")
 				continue
-			ftch.calc()#run calculation
+			if ftch.calc()==-1:#run calculation
+				sys.stderr.write("skipping calc\n")
+				continue
 			result = range(0,192)
 			sum = 0
 			for i in range(0,192):
@@ -476,7 +487,11 @@ while True:
 				#sys.stderr.write("is following\n")
 				if userOfInt in curSkeletonPersonIDs.keys() and curSkeletonPersonIDs[userOfInt] >= 0: #user is recognized and skeletonID should be sent
 					followloss = curSkeletonPersonIDs[userOfInt]
-					p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(userOfInt) + " " + str(time.time()) + "\n")
+					if lib.getUserSkeletonTorsoZ(track,user)/1000 == 0 and lib.getUserSkeletonTorsoX(track,user)/1000==0:
+						curSkeletonPersonIDs[userOfInt]=-1
+						stopfollow = True
+					else:
+						p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(userOfInt) + " " + str(time.time()) + "\n")
 				else: #user is unrecognized, send anyways in case follow was started by voice command and let the master control handle. should not send skeletonID.
 					p.write("follow "+str(lib.getUserSkeletonTorsoZ(track,user)/1000)+" "+str(lib.getUserSkeletonTorsoX(track,user)/1000)+ " " + str(time.time()) + "\n")
 			else:#they aren't tracked

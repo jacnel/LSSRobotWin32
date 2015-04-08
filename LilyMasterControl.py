@@ -89,6 +89,7 @@ def follow():
 		print "Stopping."
 		readyTT = False
 		r.setvel(0,0) #stop robot motion
+		r.vel = 0
 		mess = "stopFollow "
 		if len(list) > 3: #"follow stop idNum timeStamp"
 			try:
@@ -108,7 +109,7 @@ def follow():
 	distF = 1.5 #distance behind person to follow
 	
 	#find the point 1.5 meters behind the user on a straight line between the user and the robot
-	if a==0 and b==0:
+	if a==0 and b==0: #mod1
 		c=0
 		d=0
 	else:
@@ -117,7 +118,11 @@ def follow():
 	
 	
 	#stop moving if bump sensor is being pressed, does not stop following
-	if not r.isbumped():
+	try:
+		val = r.isbumped()
+	except:
+		val = False
+	if not val:
 		n = lidar.lidarScan(1,0,0)
 		print n
 		lidar_x = [-5]
@@ -218,8 +223,8 @@ def faceResponse():
 		sys.stderr.write("person is " + parts[3] + "\n")
 		if len(indivTime)<=int(parts[3]):
 			for x in range(len(indivTime),int(parts[3])+1):
-				parts.append(300.0)
-			sp.write("hello " + parts[3] + "\n")
+				indivTime.append(300.0)
+			sp.write( "hello " + parts[3] + "\n")
 		if indivTime[int(parts[3])]<0:
 			sp.write("hello " + parts[3] + "\n")
 		indivTime[int(parts[3])] = 300.0
