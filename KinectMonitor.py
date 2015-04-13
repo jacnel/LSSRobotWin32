@@ -41,6 +41,8 @@ lib.loop(track)
 
 MAX_GUESSES = 30 #maximum number of guesses the face identifier is allowed before a person is considered unrecognized
 framecount = 0
+
+lastrec = -1
 def detect_motion():
 	global framecount
 	global curSkeletonPersonIDs
@@ -281,8 +283,9 @@ def facialActions():
 		
 		lock.acquire()
 		for user in range(0, lib.getUsersCount(track)):
-			if lib.getUserPersonID(track, user) >= 0: # user could have been recognized by shirt/height
+			if lib.getUserPersonID(track, user) >= 0 and lastrec~=lib.getUserPersonID(track, user):#prevents a second recog (deletethis) # user could have been recognized by shirt/height
 				curSkeletonPersonIDs[lib.getUserID(track, user)] = lib.getUserPersonID(track, user) #for each user, match skeletonID to personID
+				lastrec = lib.getUserPersonID(track, user)
 			if not lib.getUserID(track, user) in personIDAttempts.keys():
 				personIDAttempts[lib.getUserID(track, user)] = 0
 			tempSkelIDs.append(lib.getUserID(track, user))
@@ -290,7 +293,7 @@ def facialActions():
 		for key in curSkeletonPersonIDs: #for every skeletonID that has been created
 			if not key in tempSkelIDs: #check if it is still on screen
 				curSkeletonPersonIDs[key] = -5 #skeleton is no longer on screen
-		
+		checkHeight()
 		checkShirts()
 		
 		deleteKeys = [] #holds keys to be deleted
@@ -481,12 +484,15 @@ def checkShirts():
 							shirts[match][1] = shirts[i][1]
 							shirts[i][1] = result #clearly this shirt value should be updated (the user has a new shirt)
 							match=i
+							sys.stderr.write("replaced shirt\n")
 							break
 					else: 
 						for j in range(0,192):#merge old results with new ones
 							shirts[i][1][j] = (shirts[i][1][j] + result[j])/2
 						match=i
+						sys.stderr.write("updated shirt\n")
 						break
+					
 					match=i
 			if lib.getUserID(track,index) in curSkeletonPersonIDs and curSkeletonPersonIDs[lib.getUserID(track,index)]>=0:
 				if match<0:
@@ -508,6 +514,7 @@ def checkShirts():
 						if found:
 							if heightTemp<aspects[user][1]*1.05 and heightTemp>aspects[user][1]*0.95:
 								curSkeletonPersonIDs[lib.getUserID(track,index)] = shirts[i][0]
+								sys.stderr.write("recognized shirt\n")
 								break#successful recognition
 				
 		
