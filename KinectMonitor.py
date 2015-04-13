@@ -42,7 +42,7 @@ lib.loop(track)
 MAX_GUESSES = 30 #maximum number of guesses the face identifier is allowed before a person is considered unrecognized
 framecount = 0
 
-lastrec = -1
+lastrec = -11
 def detect_motion():
 	global framecount
 	global curSkeletonPersonIDs
@@ -272,6 +272,7 @@ def facialActions():
 	global userOfInt
 	global pickupfollow
 	global follow
+	global lastrec
 	while True:
 		e.wait() #pauses thread if main thread flag is cleared
 		lock.acquire()
@@ -283,9 +284,10 @@ def facialActions():
 		
 		lock.acquire()
 		for user in range(0, lib.getUsersCount(track)):
-			if lib.getUserPersonID(track, user) >= 0 and lastrec~=lib.getUserPersonID(track, user):#prevents a second recog (deletethis) # user could have been recognized by shirt/height
+			if lib.getUserPersonID(track, user) >= 0 and not lastrec==lib.getUserPersonID(track, user): 
 				curSkeletonPersonIDs[lib.getUserID(track, user)] = lib.getUserPersonID(track, user) #for each user, match skeletonID to personID
 				lastrec = lib.getUserPersonID(track, user)
+				sys.stderr.write("uuussseeeddd   faaaccceee\n")
 			if not lib.getUserID(track, user) in personIDAttempts.keys():
 				personIDAttempts[lib.getUserID(track, user)] = 0
 			tempSkelIDs.append(lib.getUserID(track, user))
