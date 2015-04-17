@@ -284,10 +284,9 @@ def facialActions():
 		
 		lock.acquire()
 		for user in range(0, lib.getUsersCount(track)):
-			if lib.getUserPersonID(track, user) >= 0 and not lastrec==lib.getUserPersonID(track, user): 
+			if lib.getUserPersonID(track, user) >= 0:# and not lastrec==lib.getUserPersonID(track, user): 
 				curSkeletonPersonIDs[lib.getUserID(track, user)] = lib.getUserPersonID(track, user) #for each user, match skeletonID to personID
 				lastrec = lib.getUserPersonID(track, user)
-				sys.stderr.write("uuussseeeddd   faaaccceee\n")
 			if not lib.getUserID(track, user) in personIDAttempts.keys():
 				personIDAttempts[lib.getUserID(track, user)] = 0
 			tempSkelIDs.append(lib.getUserID(track, user))
@@ -450,12 +449,12 @@ def checkShirts():
 	global shirts
 	for index in range(0,lib.getUsersCount(track)):
 		if lib.getShirt(track,index)==0:
-			sizeY = abs(int(lib.getShirtSizeY(track)))
-			sizeX = abs(int(lib.getShirtSizeX(track)))
+			sizeY = abs(lib.getShirtSizeY(track))
+			sizeX = abs(lib.getShirtSizeX(track))
 			ftch.setImageSize(sizeX, sizeY)
 			flag = 0
-			for x in range(0,lib.getShirtSizeX(track)):
-				for y in range(0,lib.getShirtSizeY(track)):
+			for x in range(0,sizeX):
+				for y in range(0,sizeY):
 					color = lib.getColor(track,x,y)
 					if color == -1:
 						flag = 1
@@ -481,7 +480,7 @@ def checkShirts():
 					for j in range(0,192):
 						diff[i] = diff[i] + (shirts[i][1][j] - result[j])**2 #square difference
 					#sys.stderr.write(str(diff[i])+"\n")
-					if diff[i]>75:
+					if diff[i]>40:
 						if match>=0:
 							shirts[match][1] = shirts[i][1]
 							shirts[i][1] = result #clearly this shirt value should be updated (the user has a new shirt)
@@ -490,7 +489,7 @@ def checkShirts():
 							break
 					else: 
 						for j in range(0,192):#merge old results with new ones
-							shirts[i][1][j] = (shirts[i][1][j] + result[j])/2
+							shirts[i][1][j] = result[j]#(shirts[i][1][j] + result[j])/2
 						match=i
 						sys.stderr.write("updated shirt\n")
 						break
