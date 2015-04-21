@@ -453,6 +453,8 @@ def checkShirts():
 			sizeX = abs(lib.getShirtSizeX(track))
 			ftch.setImageSize(sizeX, sizeY)
 			flag = 0
+			if sizeX/(1.0*sizeY)<0.25:
+				flag = 1
 			for x in range(0,sizeX):
 				for y in range(0,sizeY):
 					color = lib.getColor(track,x,y)
