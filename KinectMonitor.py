@@ -31,6 +31,8 @@ lock.release()
 
 pose = poses()
 
+personMappings = {} #dictionary holding mappings from multiple people to one person
+personMappings[1]=0
 curSkeletonPersonIDs = {} #dictionary where a skeletonID (not index) is paired with a personID
 oldSkeletonPersonIDs = {} #old version of curSkeletonPersonIDs dictionary, used to check for changes
 personIDAttempts = {} #dictionary where a skeletonID is paired with the number of attempts made to identify the person
@@ -183,84 +185,14 @@ def detect_motion():
 				quitstage[user]="none"#invalid for the quit gesture
 			if lib.getUserSkeletonR_HandY(track,user)-lib.getUserSkeletonHeadY(track,user)>0 or lib.getUserSkeletonR_HandConf(track,user)<=0.5:
 				quitstage[user]="none"#invalid for the quit gesture
-			# found = False
-			# i = 0
-			# for skasp in skasps:
-				# if skasp[0] == lib.getUserID(track, user):
-					# found = True
-					# break
-				# i=i+1
-			# if found==False:
-				# skasps.append([lib.getUserID(track, user),-1,-1,-1])
-			
-			# if lib.getUserSkeletonHeadConf(track,user)>0.5 and lib.getUserSkeletonR_HipConf(track,user)>0.5:# and lib.getUserSkeletonR_ElbowConf(track,user)>0.5 and lib.getUserSkeletonL_ElbowConf(track,user)>0.5:
-				
-				# #hip to head
-				# skasps[i][1] = (np.sqrt((lib.getUserSkeletonHeadX(track,user)-lib.getUserSkeletonR_HipX(track,user))**2 + (lib.getUserSkeletonHeadY(track,user)-lib.getUserSkeletonR_HipY(track,user))**2 + (lib.getUserSkeletonHeadZ(track,user)-lib.getUserSkeletonR_HipZ(track,user))**2) + np.sqrt((lib.getUserSkeletonHeadX(track,user)-lib.getUserSkeletonL_HipX(track,user))**2 + (lib.getUserSkeletonHeadY(track,user)-lib.getUserSkeletonL_HipY(track,user))**2 + (lib.getUserSkeletonHeadZ(track,user)-lib.getUserSkeletonL_HipZ(track,user))**2))/2 #avg dist from hip to head
-					
-				# #sh dist
-				# skasps[i][2] = np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ShX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ShY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ShZ(track,user))**2)
-				# #upper arm dist
-				# skasps[i][3] = np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ElbowX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ElbowY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ElbowZ(track,user))**2)
-				# framecount+=1
-				# if framecount>=30:
-					# print skasps[i]
-					# print aspects[0]
-					# framecount=0
-				# #TODO: verify that curSPID is cleaned and maintained properly
-				# if not lib.getUserID(track, user) in curSkeletonPersonIDs:
-					# curSkeletonPersonIDs[lib.getUserID(track, user)] = -1
-				# if curSkeletonPersonIDs[lib.getUserID(track, user)]<0:
-					# for j in range(0,len(aspects)):#check for similarity
-						# if skasps[i][1] < aspects[j][1]*1.05 and skasps[i][1] > aspects[j][1]*0.95:
-							# if skasps[i][2] < aspects[j][2]*1.05 and skasps[i][2] > aspects[j][2]*0.95:
-								# #if skasps[i][3] < aspects[j][3]*1.2 and skasps[i][3] > aspects[j][3]*0.8:
-								# #TODO: send notification of recognition and set appropriate values
-								# curSkeletonPersonIDs[lib.getUserID(track, user)] = aspects[j][0]
-								# p.write("face recognized " + str(lib.getUserID(track, user)) + " " + str(curSkeletonPersonIDs[lib.getUserID(track, user)]) + " " + str(time.time()) + "\n")
-								# sys.stderr.write("Proportions match! Skeleton " + str(lib.getUserID(track, user)) + " identified as person: " + str(curSkeletonPersonIDs[lib.getUserID(track, user)]) + "\n")
-								# personIDAttempts[key] = MAX_GUESSES + 1
 
-			
-			   
-			
-		# #keys are skeleton id's (not indexies)
-		# for key in curSkeletonPersonIDs.keys():
-			# if curSkeletonPersonIDs[key]>=0:
-				# found = False
-				# i = 0
-				# for aspect in aspects:
-					# if aspect[0] == curSkeletonPersonIDs[key]:
-						# found = True
-						# break
-					# i=i+1
-				# if found==False:
-					# aspects.append([curSkeletonPersonIDs[key],-1,-1,-1])
-				# found = False
-				# user = 0
-				# for j in range(0,lib.getUsersCount(track)):
-					# if lib.getUserID(track, j) == key:
-						# user = j
-						# found = True
-						# break
-				# if found==False:
-					# sys.stderr.write("failed to find")
-					# continue #the skeleton of this person isn't present
-				# if lib.getUserSkeletonHeadConf(track,user)>0.5 and lib.getUserSkeletonR_HipConf(track,user)>0.5:# and lib.getUserSkeletonR_ElbowConf(track,user)>0.5 and lib.getUserSkeletonL_ElbowConf(track,user)>0.5:
-					# #TODO check distance and average it
-					# if aspects[i][1] < 0:
-						# aspects[i][1] = (np.sqrt((lib.getUserSkeletonHeadX(track,user)-lib.getUserSkeletonR_HipX(track,user))**2 + (lib.getUserSkeletonHeadY(track,user)-lib.getUserSkeletonR_HipY(track,user))**2 + (lib.getUserSkeletonHeadZ(track,user)-lib.getUserSkeletonR_HipZ(track,user))**2) + np.sqrt((lib.getUserSkeletonHeadX(track,user)-lib.getUserSkeletonL_HipX(track,user))**2 + (lib.getUserSkeletonHeadY(track,user)-lib.getUserSkeletonL_HipY(track,user))**2 + (lib.getUserSkeletonHeadZ(track,user)-lib.getUserSkeletonL_HipZ(track,user))**2))/2 #avg dist from hip to head
-					# else:
-						# aspects[i][1] = (aspects[i][1]+(np.sqrt((lib.getUserSkeletonHeadX(track,user)-lib.getUserSkeletonR_HipX(track,user))**2 + (lib.getUserSkeletonHeadY(track,user)-lib.getUserSkeletonR_HipY(track,user))**2 + (lib.getUserSkeletonHeadZ(track,user)-lib.getUserSkeletonR_HipZ(track,user))**2) + np.sqrt((lib.getUserSkeletonHeadX(track,user)-lib.getUserSkeletonL_HipX(track,user))**2 + (lib.getUserSkeletonHeadY(track,user)-lib.getUserSkeletonL_HipY(track,user))**2 + (lib.getUserSkeletonHeadZ(track,user)-lib.getUserSkeletonL_HipZ(track,user))**2))/2)/2 #avg dist from hip to head
-					# if aspects[i][2] < 0: #sh dist
-						# aspects[i][2] = np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ShX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ShY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ShZ(track,user))**2)
-					# else:
-						# aspects[i][2] = (aspects[i][2]+np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ShX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ShY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ShZ(track,user))**2))/2
-					# if aspects[i][3] < 0: #sh dist
-						# aspects[i][3] = np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ShX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ShY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ShZ(track,user))**2)
-					# else:
-						# aspects[i][3] = (aspects[i][3]+np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ShX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ShY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ShZ(track,user))**2))/2
-					
+def remapPeople():
+	for key in curSkeletonPersonIDs:
+		if curSkeletonPersonIDs[key] in personMappings:
+			curSkeletonPersonIDs[key]=personMappings[curSkeletonPersonIDs[key]]
+
+
+				
 # TODO Allow identification to be done using body proportion and color information
 # when confidence is high that the user is the correct person, send identifier.
 #LMC should be modified to look through current users and delete false recognitions when new recognitions are received 
@@ -296,7 +228,7 @@ def facialActions():
 				curSkeletonPersonIDs[key] = -5 #skeleton is no longer on screen
 		checkHeight()
 		checkShirts()
-		
+		remapPeople()
 		deleteKeys = [] #holds keys to be deleted
 		#check for any changes in the personIDs that correspond to the skeletonIDs
 		for key in curSkeletonPersonIDs.keys():
@@ -407,46 +339,10 @@ def checkHeight():
 					aspects[i][3] = np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ShX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ShY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ShZ(track,user))**2)
 				else:
 					aspects[i][3] = (aspects[i][3]+np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ShX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ShY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ShZ(track,user))**2))/2
-	# found = False
-	# i = 0
-	# for skasp in skasps:
-		# if skasp[0] == lib.getUserID(track, user):
-			# found = True
-			# break
-		# i=i+1
-	# if found==False:
-		# skasps.append([lib.getUserID(track, user),-1,-1,-1])
-	
-	# if lib.getUserSkeletonHeadConf(track,user)>0.5 and lib.getUserSkeletonR_HipConf(track,user)>0.5:# and lib.getUserSkeletonR_ElbowConf(track,user)>0.5 and lib.getUserSkeletonL_ElbowConf(track,user)>0.5:
-		
-		##hip to head
-		# skasps[i][1] = (np.sqrt((lib.getUserSkeletonHeadX(track,user)-lib.getUserSkeletonR_HipX(track,user))**2 + (lib.getUserSkeletonHeadY(track,user)-lib.getUserSkeletonR_HipY(track,user))**2 + (lib.getUserSkeletonHeadZ(track,user)-lib.getUserSkeletonR_HipZ(track,user))**2) + np.sqrt((lib.getUserSkeletonHeadX(track,user)-lib.getUserSkeletonL_HipX(track,user))**2 + (lib.getUserSkeletonHeadY(track,user)-lib.getUserSkeletonL_HipY(track,user))**2 + (lib.getUserSkeletonHeadZ(track,user)-lib.getUserSkeletonL_HipZ(track,user))**2))/2 #avg dist from hip to head
-			
-		##sh dist
-		# skasps[i][2] = np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ShX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ShY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ShZ(track,user))**2)
-		##upper arm dist
-		# skasps[i][3] = np.sqrt((lib.getUserSkeletonL_ShX(track,user)-lib.getUserSkeletonR_ElbowX(track,user))**2 + (lib.getUserSkeletonL_ShY(track,user)-lib.getUserSkeletonR_ElbowY(track,user))**2 + (lib.getUserSkeletonL_ShZ(track,user)-lib.getUserSkeletonR_ElbowZ(track,user))**2)
-		# framecount+=1
-		# if framecount>=30:
-			# print skasps[i]
-			# print aspects[0]
-			# framecount=0
-		##TODO: verify that curSPID is cleaned and maintained properly
-		# if not lib.getUserID(track, user) in curSkeletonPersonIDs:
-			# curSkeletonPersonIDs[lib.getUserID(track, user)] = -1
-		# if curSkeletonPersonIDs[lib.getUserID(track, user)]<0:
-			# for j in range(0,len(aspects)):#check for similarity
-				# if skasps[i][1] < aspects[j][1]*1.05 and skasps[i][1] > aspects[j][1]*0.95:
-					# if skasps[i][2] < aspects[j][2]*1.05 and skasps[i][2] > aspects[j][2]*0.95:
-						##if skasps[i][3] < aspects[j][3]*1.2 and skasps[i][3] > aspects[j][3]*0.8:
-						##TODO: send notification of recognition and set appropriate values
-						# curSkeletonPersonIDs[lib.getUserID(track, user)] = aspects[j][0]
-						# p.write("face recognized " + str(lib.getUserID(track, user)) + " " + str(curSkeletonPersonIDs[lib.getUserID(track, user)]) + " " + str(time.time()) + "\n")
-						# sys.stderr.write("Proportions match! Skeleton " + str(lib.getUserID(track, user)) + " identified as person: " + str(curSkeletonPersonIDs[lib.getUserID(track, user)]) + "\n")
-						# personIDAttempts[key] = MAX_GUESSES + 1
-			
+
 def checkShirts():
 	global shirts
+	TH = 40
 	for index in range(0,lib.getUsersCount(track)):
 		if lib.getShirt(track,index)==0:
 			sizeY = abs(lib.getShirtSizeY(track))
@@ -482,7 +378,7 @@ def checkShirts():
 					for j in range(0,192):
 						diff[i] = diff[i] + (shirts[i][1][j] - result[j])**2 #square difference
 					#sys.stderr.write(str(diff[i])+"\n")
-					if diff[i]>40:
+					if diff[i]>TH:
 						if match>=0:
 							shirts[match][1] = shirts[i][1]
 							shirts[i][1] = result #clearly this shirt value should be updated (the user has a new shirt)
@@ -506,7 +402,7 @@ def checkShirts():
 					#sys.stderr.write(str(len(shirts))+"\n")
 			else:
 				for i in range(0,len(shirts)):
-					if diff[i]<=75:#compare to recorded
+					if diff[i]<=TH:#compare to recorded
 						heightTemp  =(np.sqrt((lib.getUserSkeletonHeadX(track,index)-lib.getUserSkeletonR_HipX(track,index))**2 + (lib.getUserSkeletonHeadY(track,index)-lib.getUserSkeletonR_HipY(track,index))**2 + (lib.getUserSkeletonHeadZ(track,index)-lib.getUserSkeletonR_HipZ(track,index))**2) + np.sqrt((lib.getUserSkeletonHeadX(track,index)-lib.getUserSkeletonL_HipX(track,index))**2 + (lib.getUserSkeletonHeadY(track,index)-lib.getUserSkeletonL_HipY(track,index))**2 + (lib.getUserSkeletonHeadZ(track,index)-lib.getUserSkeletonL_HipZ(track,index))**2))/2
 						found = False
 						for j in range(0,len(aspects)):
@@ -515,7 +411,7 @@ def checkShirts():
 								found = True
 								break
 						if found:
-							if heightTemp<aspects[user][1]*1.05 and heightTemp>aspects[user][1]*0.95:
+							if heightTemp<aspects[user][1]*1.02 and heightTemp>aspects[user][1]*0.98:
 								curSkeletonPersonIDs[lib.getUserID(track,index)] = shirts[i][0]
 								sys.stderr.write("recognized shirt\n")
 								break#successful recognition

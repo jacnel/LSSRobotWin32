@@ -1,5 +1,6 @@
 To use this project, please install the following programs from the LILI Install folder:
 (even if you are running 64-bit Windows, Please use 32-bit versions of these programs)
+(You can get the folder here https://mega.co.nz/#!hV0WHL7a!7preeVssQ1CxlQuMfU8TifhyZZkOo4HakjxdXgnvIkU)
 
 The CSLU Toolkit as described in TalkingAvatarReadme.
 	run cslu206
@@ -43,3 +44,4 @@ All other related code can be found in the following repositories:
 https://github.com/deadtomgc/nitepy
 https://github.com/clguerrero93/lilivoicecommand
 https://github.com/deadtomgc/fakeinput
+https://github.com/DeadTomGC/FTCHinterface

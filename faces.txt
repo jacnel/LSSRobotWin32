@@ -14,4 +14,8 @@ tImg/daniel12.jpg;0
 tImg/daniel13.jpg;0
 tImg/daniel14.jpg;0
 tImg/daniel15.jpg;0
-tImg/daniel16.jpg;1
+tImg/tom14.jpg;1
+tImg/tom12.jpg;1
+tImg/tom11.jpg;1
+tImg/tom10.jpg;1
+tImg/tom9.jpg;1
