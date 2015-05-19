@@ -13,4 +13,5 @@ Running LILI
 -open baldi sync (help can be found in TalkingAvatarReadme if it is needed)
 -click into the text box in the non-face window
 -go to LSSRobotWin32 folder in command line
--run "python LilyMasterControl.py"
+-run run.bat
+-use the GUI to connect to the urg, then close the GUI. 
