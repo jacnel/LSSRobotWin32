@@ -31,6 +31,7 @@ Python 2.7
 	-pyserial, numpy, matplotlib
 
 If there are errors dealing with "clr" module, unzip Python for .NET into the working directory along with a copy of the python.exe from the Python27 folder after installing python 2.7
+If you're using Windows 8 and you have these issues, install Python for .NET usind PIP. 
 
 Canopy and Visual Studios are optional editors
 
