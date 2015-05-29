@@ -26,12 +26,12 @@ Microsoft Speech SDK 11:
 
 OpenNI 2.1 
 NITE 2.2 (install OpenNI first)
-OpenCV 2.4.9
+OpenCV 2.4.9 (Extract to C drive and add the x86 vc10 bin folder (the one with a bunch of dlls) to the PATH environment variable. Then restart.)
 Python 2.7 
 	-pyserial, numpy, matplotlib
 
 If there are errors dealing with "clr" module, unzip Python for .NET into the working directory along with a copy of the python.exe from the Python27 folder after installing python 2.7
-If you're using Windows 8 and you have these issues, install Python for .NET usind PIP. 
+If you're using Windows 8 and you have these issues, install Python for .NET usind PIP (after installing pip, run "pip install pythonnet". Then, remove all the files in "pthon for .net.zip" from lssrobotwin32). 
 
 Canopy and Visual Studios are optional editors
 
