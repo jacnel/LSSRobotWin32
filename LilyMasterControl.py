@@ -345,7 +345,7 @@ sp = IPC.process(False, 'phrasesToSay.py')
 sp.setOnReadLine(checkReady)
 
 # Open Speech Recognition Control
-vm = IPC.process(False, 'VoiceMonitor.py')
+vm = IPC.process(False, '.\lili-interpreter\LILIExecutor.py')
 vm.setOnReadLine(VocalQueue)
 
 # Initialize synchronization
